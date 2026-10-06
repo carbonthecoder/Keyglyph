@@ -28,17 +28,17 @@ export function OptionsDrawer({
       className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-32px)] sm:w-84 max-w-sm rounded-xl p-5 shadow-2xl z-50 border transition-all duration-200 ${
         isDark
           ? 'bg-black border-neutral-800 text-neutral-200 shadow-[0_8px_30px_rgb(0,0,0,0.8)]'
-          : 'bg-white border-neutral-200 text-neutral-900 shadow-[0_8px_30px_rgb(0,0,0,0.08)]'
+          : 'bg-white border-neutral-300 text-neutral-900 shadow-[0_8px_30px_rgba(0,0,0,0.12)]'
       }`}
     >
-      {/* Vercel Header */}
+      {/* Header */}
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-neutral-200 dark:border-neutral-800">
-        <span className="font-medium text-xs tracking-tight text-neutral-900 dark:text-neutral-100">
+        <span className="font-semibold text-xs tracking-tight text-neutral-900 dark:text-neutral-100">
           Configuration
         </span>
         <button
           onClick={onClose}
-          className="p-1 rounded-md text-neutral-400 hover:text-black dark:hover:text-white transition-colors"
+          className="p-1 rounded-md text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white transition-colors"
         >
           <X className="w-3.5 h-3.5" />
         </button>
@@ -47,14 +47,14 @@ export function OptionsDrawer({
       <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-0.5 text-xs">
         {/* Layout */}
         <div className="flex items-center justify-between">
-          <span className="font-medium text-neutral-500 dark:text-neutral-400">Layout</span>
+          <span className="font-medium text-neutral-700 dark:text-neutral-400">Layout</span>
           <select
             value={options.layout}
             onChange={(e) => onChange('layout', e.target.value)}
             className={`h-7 px-2.5 rounded-md border outline-none font-mono text-xs cursor-pointer transition-colors ${
               isDark
                 ? 'bg-[#0a0a0a] border-neutral-800 text-white hover:border-neutral-700'
-                : 'bg-neutral-50 border-neutral-200 text-black hover:border-neutral-300'
+                : 'bg-neutral-100 border-neutral-300 text-neutral-900 hover:border-neutral-400 font-medium'
             }`}
           >
             {Object.entries(KEYBOARD_LAYOUTS).map(([key, item]) => (
@@ -65,9 +65,9 @@ export function OptionsDrawer({
           </select>
         </div>
 
-        {/* Curve Selection - Vercel Segmented Group */}
+        {/* Curve Selection */}
         <div>
-          <span className="font-medium text-neutral-500 dark:text-neutral-400 block mb-2">Curve</span>
+          <span className="font-medium text-neutral-700 dark:text-neutral-400 block mb-2">Curve</span>
           <div className="flex flex-wrap gap-1 p-1 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg">
             {CURVE_TYPES.map((curve) => {
               const isSelected = options.curveType === curve.id;
@@ -78,9 +78,11 @@ export function OptionsDrawer({
                   className={`text-[11px] px-2 py-1 rounded-md transition-all font-mono ${
                     isSelected
                       ? isDark
-                        ? 'bg-neutral-800 text-white shadow-sm font-medium'
-                        : 'bg-white text-black shadow-sm font-medium'
-                      : 'text-neutral-500 hover:text-black dark:hover:text-white'
+                        ? 'bg-neutral-800 text-white shadow-sm font-semibold'
+                        : 'bg-black text-white shadow-sm font-semibold'
+                      : isDark
+                      ? 'text-neutral-400 hover:text-white'
+                      : 'text-neutral-700 hover:text-black font-medium'
                   }`}
                 >
                   {curve.label}
@@ -92,14 +94,14 @@ export function OptionsDrawer({
 
         {/* Numbers Row Toggle */}
         <div className="flex items-center justify-between">
-          <span className="font-medium text-neutral-500 dark:text-neutral-400">Numbers Row</span>
+          <span className="font-medium text-neutral-700 dark:text-neutral-400">Numbers Row</span>
           <button
             type="button"
             onClick={() => onChange('showNumbers', !options.showNumbers)}
             className={`w-9 h-5 rounded-full relative transition-colors duration-200 cursor-pointer ${
               options.showNumbers
                 ? isDark ? 'bg-white' : 'bg-black'
-                : isDark ? 'bg-neutral-800' : 'bg-neutral-200'
+                : isDark ? 'bg-neutral-800' : 'bg-neutral-300'
             }`}
           >
             <div
@@ -114,7 +116,7 @@ export function OptionsDrawer({
 
         {/* Color Palette */}
         <div className="flex items-center justify-between">
-          <span className="font-medium text-neutral-500 dark:text-neutral-400">Stroke Color</span>
+          <span className="font-medium text-neutral-700 dark:text-neutral-400">Stroke Color</span>
           <div className="flex items-center gap-1.5">
             <div className="flex gap-1">
               {colorPresets.map((c) => (
@@ -124,8 +126,8 @@ export function OptionsDrawer({
                   style={{ backgroundColor: c }}
                   className={`w-3.5 h-3.5 rounded-full border transition-transform ${
                     options.color.toLowerCase() === c.toLowerCase()
-                      ? 'scale-125 ring-1 ring-neutral-400 dark:ring-neutral-500'
-                      : 'border-neutral-300 dark:border-neutral-700 opacity-80 hover:opacity-100'
+                      ? 'scale-125 ring-2 ring-blue-500'
+                      : 'border-neutral-400 dark:border-neutral-700 opacity-80 hover:opacity-100'
                   }`}
                 />
               ))}
@@ -139,7 +141,7 @@ export function OptionsDrawer({
               />
               <div
                 style={{ backgroundColor: options.color }}
-                className="w-5 h-5 rounded border border-neutral-300 dark:border-neutral-700 shadow-sm"
+                className="w-5 h-5 rounded border border-neutral-400 dark:border-neutral-700 shadow-sm"
               />
             </label>
           </div>
@@ -148,8 +150,8 @@ export function OptionsDrawer({
         {/* Stroke Width Slider */}
         <div>
           <div className="flex justify-between items-center mb-1">
-            <span className="font-medium text-neutral-500 dark:text-neutral-400">Stroke Width</span>
-            <span className="font-mono text-neutral-400 dark:text-neutral-500">{options.strokeWidth}px</span>
+            <span className="font-medium text-neutral-700 dark:text-neutral-400">Stroke Width</span>
+            <span className="font-mono text-neutral-700 dark:text-neutral-500">{options.strokeWidth}px</span>
           </div>
           <input
             type="range"
@@ -157,15 +159,15 @@ export function OptionsDrawer({
             max="8"
             value={options.strokeWidth}
             onChange={(e) => onChange('strokeWidth', parseInt(e.target.value, 10))}
-            className="w-full h-1 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-black dark:accent-white"
+            className="w-full h-1 bg-neutral-300 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-black dark:accent-white"
           />
         </div>
       </div>
 
-      {/* Reset to Defaults - Vercel Secondary Button */}
+      {/* Reset to Defaults */}
       <button
         onClick={onReset}
-        className="w-full mt-5 py-2 text-xs font-medium rounded-lg border transition-colors border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-900 hover:text-black dark:hover:text-white"
+        className="w-full mt-5 py-2 text-xs font-semibold rounded-lg border transition-colors border-neutral-300 dark:border-neutral-800 bg-neutral-100 dark:bg-black text-neutral-900 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-900"
       >
         Reset to Defaults
       </button>

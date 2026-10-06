@@ -290,10 +290,10 @@ export default function App() {
       <div className="fixed bottom-6 right-6 z-40">
         <button
           onClick={() => setIsOptionsOpen(!isOptionsOpen)}
-          className={`h-8 px-3 rounded-lg text-xs font-medium border transition-colors flex items-center gap-1.5 shadow-sm ${
+          className={`h-8 px-3 rounded-lg text-xs font-semibold border transition-colors flex items-center gap-1.5 shadow-sm ${
             isDark
               ? 'bg-black border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700'
-              : 'bg-white border-neutral-200 text-neutral-700 hover:text-black hover:border-neutral-300'
+              : 'bg-neutral-100 border-neutral-300 text-neutral-900 hover:bg-neutral-200 hover:border-neutral-400'
           }`}
         >
           <Sliders className="w-3.5 h-3.5" />
