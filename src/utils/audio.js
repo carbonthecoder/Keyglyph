@@ -1,10 +1,10 @@
-// Synthesized Web Audio API Key Sounds - zero external assets needed!
+// Ultra-satisfying Mechanical Keyboard Audio Synthesizer (Web Audio API)
 
 class SoundEngine {
   constructor() {
     this.ctx = null;
     this.enabled = true;
-    this.soundType = 'clicky'; // 'clicky' | 'linear' | 'thock'
+    this.noiseBuffer = null;
   }
 
   init() {
@@ -12,11 +12,23 @@ class SoundEngine {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
         this.ctx = new AudioCtx();
+        this.createNoiseBuffer();
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
       this.ctx.resume();
     }
+  }
+
+  createNoiseBuffer() {
+    if (!this.ctx) return;
+    const bufferSize = this.ctx.sampleRate * 0.05; // 50ms noise
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    this.noiseBuffer = buffer;
   }
 
   playKey() {
@@ -26,42 +38,48 @@ class SoundEngine {
       if (!this.ctx) return;
 
       const now = this.ctx.currentTime;
-      
-      // High-frequency click oscillator
+      const pitchOffset = (Math.random() - 0.5) * 60; // Dynamic pitch variance
+
+      // Layer 1: Deep Mechanical Thock Body
       const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
+      const oscGain = this.ctx.createGain();
 
-      if (this.soundType === 'clicky') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(1400 + Math.random() * 200, now);
-        osc.frequency.exponentialRampToValueAtTime(300, now + 0.04);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(380 + pitchOffset, now);
+      osc.frequency.exponentialRampToValueAtTime(75, now + 0.045);
 
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
-      } else if (this.soundType === 'thock') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(350 + Math.random() * 50, now);
-        osc.frequency.exponentialRampToValueAtTime(80, now + 0.06);
+      oscGain.gain.setValueAtTime(0.18, now);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
 
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
-      } else {
-        // Subtle soft linear
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(700, now);
-        osc.frequency.exponentialRampToValueAtTime(200, now + 0.03);
-
-        gain.gain.setValueAtTime(0.07, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
-      }
-
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      osc.connect(oscGain);
+      oscGain.connect(this.ctx.destination);
 
       osc.start(now);
-      osc.stop(now + 0.06);
+      osc.stop(now + 0.05);
+
+      // Layer 2: Tactile Keycap Snap (Filtered Noise Burst)
+      if (this.noiseBuffer) {
+        const noiseSource = this.ctx.createBufferSource();
+        noiseSource.buffer = this.noiseBuffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(2200 + pitchOffset * 5, now);
+        filter.Q.setValueAtTime(3, now);
+
+        const noiseGain = this.ctx.createGain();
+        noiseGain.gain.setValueAtTime(0.12, now);
+        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+
+        noiseSource.connect(filter);
+        filter.connect(noiseGain);
+        noiseGain.connect(this.ctx.destination);
+
+        noiseSource.start(now);
+        noiseSource.stop(now + 0.035);
+      }
     } catch {
-      // Audio playback error (e.g. user hasn't interacted yet)
+      // Audio playback safety catch
     }
   }
 }

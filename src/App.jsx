@@ -21,7 +21,6 @@ const DEFAULT_OPTIONS = {
 };
 
 export default function App() {
-  // Empty default name so "Enter your name" placeholder shows cleanly
   const [inputText, setInputText] = useState('');
   const [options, setOptions] = useState(DEFAULT_OPTIONS);
   const [isDark, setIsDark] = useState(true);
@@ -31,7 +30,7 @@ export default function App() {
   const [keyPositions, setKeyPositions] = useState({});
   const [toastMessage, setToastMessage] = useState(null);
 
-  // Keyboard auto-disappear timer
+  // Keyboard auto-disappear state
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(true);
   const inactivityTimerRef = useRef(null);
 
@@ -42,16 +41,19 @@ export default function App() {
   const svgRef = useRef(null);
   const textInputRef = useRef(null);
 
-  // Reset timer to hide keypad after user stops typing
+  // Timer to hide keypad only if user has entered text
   const resetInactivityTimer = useCallback(() => {
     setIsKeyboardVisible(true);
     if (inactivityTimerRef.current) {
       clearTimeout(inactivityTimerRef.current);
     }
-    inactivityTimerRef.current = setTimeout(() => {
-      // Only hide if user has typed something
-      setIsKeyboardVisible(false);
-    }, 2400);
+    // Only fade out keyboard if user has entered text
+    const currentVal = textInputRef.current ? textInputRef.current.value : '';
+    if (currentVal && currentVal.trim().length > 0) {
+      inactivityTimerRef.current = setTimeout(() => {
+        setIsKeyboardVisible(false);
+      }, 2500);
+    }
   }, []);
 
   // Theme setup
@@ -102,7 +104,14 @@ export default function App() {
   // Physical keyboard listener
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.target.tagName === 'INPUT' && e.target !== textInputRef.current) {
+      // If user is focused inside an input element, native input handles text!
+      if (e.target.tagName === 'INPUT') {
+        if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          const char = e.key.toUpperCase();
+          setLastPressedKey(char);
+          setTimeout(() => setLastPressedKey(null), 120);
+        }
+        resetInactivityTimer();
         return;
       }
 
@@ -135,11 +144,11 @@ export default function App() {
 
   // Virtual key click
   const handleVirtualKeyClick = (char) => {
-    resetInactivityTimer();
     setLastPressedKey(char);
     setTimeout(() => setLastPressedKey(null), 120);
     setInputText((prev) => (prev + char.toLowerCase()).slice(0, 35));
     soundEngine.playKey();
+    resetInactivityTimer();
   };
 
   const handleOptionChange = (key, value) => {
@@ -186,7 +195,7 @@ export default function App() {
         isDark ? 'bg-black text-white' : 'bg-white text-black'
       }`}
     >
-      {/* Toast Notification - Vercel Toast Style */}
+      {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-3 py-1.5 rounded-md bg-neutral-900 text-white dark:bg-neutral-100 dark:text-black text-xs font-mono border border-neutral-800 dark:border-neutral-200 shadow-xl flex items-center gap-2">
           <Check className="w-3.5 h-3.5 text-emerald-500" />
@@ -216,7 +225,9 @@ export default function App() {
             type="text"
             value={inputText}
             onChange={(e) => {
-              setInputText(e.target.value.slice(0, 35));
+              const val = e.target.value.slice(0, 35);
+              setInputText(val);
+              soundEngine.playKey();
               resetInactivityTimer();
             }}
             placeholder="Enter your name"
@@ -258,7 +269,7 @@ export default function App() {
           />
         </div>
 
-        {/* Clean Vercel Export Buttons (Only visible when text is typed) */}
+        {/* Clean Vercel Export Buttons */}
         <div className="mt-10 flex items-center gap-2.5 z-30">
           <button
             onClick={() => handleStartExport('SVG')}
