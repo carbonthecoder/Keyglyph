@@ -43,6 +43,7 @@ export function SignatureOverlay({
   return (
     <svg
       ref={svgRef}
+      xmlns="http://www.w3.org/2000/svg"
       className="absolute inset-0 w-full h-full pointer-events-none z-20 overflow-visible"
     >
       <defs>
@@ -72,12 +73,15 @@ export function SignatureOverlay({
           strokeLinecap="round"
           strokeLinejoin="round"
           filter={styleMode === 'glow' ? 'url(#signature-glow)' : undefined}
-          style={{
-            pathLength: 1,
-            strokeDasharray: 1,
-            strokeDashoffset: 1 - replayProgress,
-            transition: replayProgress === 1 ? 'stroke-dashoffset 0.1s linear' : 'none',
-          }}
+          style={
+            replayProgress < 1
+              ? {
+                  pathLength: 1,
+                  strokeDasharray: 1,
+                  strokeDashoffset: 1 - replayProgress,
+                }
+              : undefined
+          }
         />
       )}
 

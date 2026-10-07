@@ -176,13 +176,13 @@ export default function App() {
     setIsAdOpen(false);
     if (pendingExportType === 'SVG') {
       if (svgRef.current) {
-        downloadSVG(svgRef.current, `${inputText || 'signature'}.svg`, false);
+        downloadSVG(svgRef.current, `${inputText || 'signature'}.svg`, isDark);
         confetti({ particleCount: 35, spread: 50, origin: { y: 0.85 } });
         showToast('SVG exported');
       }
     } else {
       if (svgRef.current) {
-        downloadPNG(svgRef.current, `${inputText || 'signature'}.png`, 2, false);
+        downloadPNG(svgRef.current, `${inputText || 'signature'}.png`, 2, isDark);
         confetti({ particleCount: 40, spread: 55, origin: { y: 0.85 } });
         showToast('PNG exported');
       }

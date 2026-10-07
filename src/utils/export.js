@@ -2,18 +2,33 @@
  * Export helpers for Vector SVG and High-Res PNG
  */
 
-export function downloadSVG(svgElement, filename = 'keyboard-signature.svg', withBackground = false, bgColor = '#090a0f') {
+export function downloadSVG(svgElement, filename = 'keyglyph-signature.svg', isDark = true) {
   if (!svgElement) return;
 
+  const rect = svgElement.getBoundingClientRect();
+  const width = Math.max(rect.width || svgElement.clientWidth || 800, 300);
+  const height = Math.max(rect.height || svgElement.clientHeight || 450, 200);
+
   const clone = svgElement.cloneNode(true);
-  
-  if (withBackground) {
-    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    rect.setAttribute('width', '100%');
-    rect.setAttribute('height', '100%');
-    rect.setAttribute('fill', bgColor);
-    clone.insertBefore(rect, clone.firstChild);
-  }
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  clone.setAttribute('width', width);
+  clone.setAttribute('height', height);
+  clone.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+  // Insert background rect so white signatures are clearly visible in external image viewers
+  const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  bgRect.setAttribute('width', '100%');
+  bgRect.setAttribute('height', '100%');
+  bgRect.setAttribute('fill', isDark ? '#000000' : '#ffffff');
+  clone.insertBefore(bgRect, clone.firstChild);
+
+  // Remove any leftover dash styling on path
+  const paths = clone.querySelectorAll('path');
+  paths.forEach((p) => {
+    p.removeAttribute('style');
+    p.removeAttribute('stroke-dasharray');
+    p.removeAttribute('stroke-dashoffset');
+  });
 
   const svgData = new XMLSerializer().serializeToString(clone);
   const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
@@ -28,10 +43,33 @@ export function downloadSVG(svgElement, filename = 'keyboard-signature.svg', wit
   URL.revokeObjectURL(url);
 }
 
-export function downloadPNG(svgElement, filename = 'keyboard-signature.png', scale = 2, withBackground = false, bgColor = '#090a0f') {
+export function downloadPNG(svgElement, filename = 'keyglyph-signature.png', scale = 2, isDark = true) {
   if (!svgElement) return;
 
-  const svgData = new XMLSerializer().serializeToString(svgElement);
+  const rect = svgElement.getBoundingClientRect();
+  const width = Math.max(rect.width || svgElement.clientWidth || 800, 300);
+  const height = Math.max(rect.height || svgElement.clientHeight || 450, 200);
+
+  const clone = svgElement.cloneNode(true);
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  clone.setAttribute('width', width);
+  clone.setAttribute('height', height);
+  clone.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+  const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  bgRect.setAttribute('width', '100%');
+  bgRect.setAttribute('height', '100%');
+  bgRect.setAttribute('fill', isDark ? '#000000' : '#ffffff');
+  clone.insertBefore(bgRect, clone.firstChild);
+
+  const paths = clone.querySelectorAll('path');
+  paths.forEach((p) => {
+    p.removeAttribute('style');
+    p.removeAttribute('stroke-dasharray');
+    p.removeAttribute('stroke-dashoffset');
+  });
+
+  const svgData = new XMLSerializer().serializeToString(clone);
   const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
   const URLObj = window.URL || window.webkitURL || window;
   const blobURL = URLObj.createObjectURL(svgBlob);
@@ -39,19 +77,12 @@ export function downloadPNG(svgElement, filename = 'keyboard-signature.png', sca
   const image = new Image();
   image.onload = () => {
     const canvas = document.createElement('canvas');
-    const width = svgElement.clientWidth || 800;
-    const height = svgElement.clientHeight || 450;
-
     canvas.width = width * scale;
     canvas.height = height * scale;
     const ctx = canvas.getContext('2d');
 
-    if (withBackground) {
-      ctx.fillStyle = bgColor;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    } else {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
+    ctx.fillStyle = isDark ? '#000000' : '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
