@@ -429,79 +429,81 @@ export default function App() {
           />
         </div>
 
-        {/* Clean Vercel Action Buttons with Space Mono and grey hover effect */}
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-2.5 z-30 font-mono">
-          <button
-            onClick={handleReplay}
-            className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
-              isDark
-                ? 'bg-neutral-900 border border-neutral-800 text-neutral-200 hover:text-neutral-400 hover:bg-neutral-800'
-                : 'bg-neutral-100 border border-neutral-300 text-neutral-900 hover:text-neutral-500 hover:bg-neutral-200'
-            }`}
-            title="Replay stroke drawing animation"
-          >
-            <Play className={`w-3.5 h-3.5 ${isReplaying ? 'animate-pulse text-amber-500' : ''}`} />
-            <span>{isReplaying ? 'Replaying...' : 'Replay'}</span>
-          </button>
+        {/* Action Buttons: Only show when user has entered text */}
+        {inputText && inputText.trim().length > 0 && (
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-2.5 z-30 font-mono transition-all duration-300 animate-in fade-in zoom-in-95">
+            <button
+              onClick={handleReplay}
+              className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
+                isDark
+                  ? 'bg-neutral-900 border border-neutral-800 text-neutral-200 hover:text-neutral-400 hover:bg-neutral-800'
+                  : 'bg-neutral-100 border border-neutral-300 text-neutral-900 hover:text-neutral-500 hover:bg-neutral-200'
+              }`}
+              title="Replay stroke drawing animation"
+            >
+              <Play className={`w-3.5 h-3.5 ${isReplaying ? 'animate-pulse text-amber-500' : ''}`} />
+              <span>{isReplaying ? 'Replaying...' : 'Replay'}</span>
+            </button>
 
-          <button
-            onClick={handleCopySVG}
-            className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-200 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer relative overflow-hidden ${
-              isCopied
-                ? 'bg-gradient-to-r from-violet-600 via-fuchsia-600 to-cyan-500 text-white shadow-[0_0_16px_rgba(168,85,247,0.55)] border border-transparent scale-102'
-                : isDark
-                ? 'bg-neutral-900 border border-neutral-800 text-neutral-200 hover:text-neutral-400 hover:bg-neutral-800'
-                : 'bg-neutral-100 border border-neutral-300 text-neutral-900 hover:text-neutral-500 hover:bg-neutral-200'
-            }`}
-            title="Copy vector SVG to clipboard for Figma or Illustrator"
-          >
-            {isCopied ? (
-              <>
-                <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" />
-                <span className="tracking-wide">Copied! ✨</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-3.5 h-3.5" />
-                <span>Copy SVG</span>
-              </>
-            )}
-          </button>
+            <button
+              onClick={handleCopySVG}
+              className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-200 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer relative overflow-hidden ${
+                isCopied
+                  ? 'bg-gradient-to-r from-violet-600 via-fuchsia-600 to-cyan-500 text-white shadow-[0_0_16px_rgba(168,85,247,0.55)] border border-transparent scale-102'
+                  : isDark
+                  ? 'bg-neutral-900 border border-neutral-800 text-neutral-200 hover:text-neutral-400 hover:bg-neutral-800'
+                  : 'bg-neutral-100 border border-neutral-300 text-neutral-900 hover:text-neutral-500 hover:bg-neutral-200'
+              }`}
+              title="Copy vector SVG to clipboard for Figma or Illustrator"
+            >
+              {isCopied ? (
+                <>
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" />
+                  <span className="tracking-wide">Copied! ✨</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copy SVG</span>
+                </>
+              )}
+            </button>
 
-          <button
-            onClick={() => handleStartExport('SVG')}
-            className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
-              isDark
-                ? 'bg-white text-black hover:text-neutral-600 hover:bg-neutral-200'
-                : 'bg-black text-white hover:text-neutral-400 hover:bg-neutral-800'
-            }`}
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export SVG</span>
-          </button>
+            <button
+              onClick={() => handleStartExport('SVG')}
+              className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
+                isDark
+                  ? 'bg-white text-black hover:text-neutral-600 hover:bg-neutral-200'
+                  : 'bg-black text-white hover:text-neutral-400 hover:bg-neutral-800'
+              }`}
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export SVG</span>
+            </button>
 
-          <button
-            onClick={() => handleStartExport('PNG')}
-            className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
-              isDark
-                ? 'bg-white text-black hover:text-neutral-600 hover:bg-neutral-200'
-                : 'bg-black text-white hover:text-neutral-400 hover:bg-neutral-800'
-            }`}
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export PNG</span>
-          </button>
-        </div>
+            <button
+              onClick={() => handleStartExport('PNG')}
+              className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
+                isDark
+                  ? 'bg-white text-black hover:text-neutral-600 hover:bg-neutral-200'
+                  : 'bg-black text-white hover:text-neutral-400 hover:bg-neutral-800'
+              }`}
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export PNG</span>
+            </button>
+          </div>
+        )}
       </main>
 
-      {/* AI & Emotional Words Footer */}
+      {/* High-Energy Solid Footer with Covert Vanguard Lineage */}
       <footer className="w-full py-8 px-4 text-center z-30 font-mono select-none">
         <div className="max-w-2xl mx-auto flex flex-col items-center gap-2.5">
-          <p className="text-xs sm:text-[13px] tracking-wide text-neutral-500 dark:text-neutral-400 leading-relaxed font-sans sm:font-mono italic">
-            "Where human emotion meets artificial intelligence — every keystroke leaves a digital soul in the machine."
+          <p className="text-xs sm:text-[13px] tracking-wide text-neutral-800 dark:text-neutral-200 font-bold leading-relaxed">
+            Pure kinetic euphoria — transmuting everyday keystrokes into sheer vector brilliance.
           </p>
-          <div className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 text-xs text-neutral-400 dark:text-neutral-500 font-mono">
-            <span>crafted with soul by</span>
+          <div className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 text-xs text-neutral-500 dark:text-neutral-400 font-mono">
+            <span>engineered with relentless vigor by</span>
             <a
               href="https://ibrahim.is-cool.dev"
               target="_blank"
@@ -510,24 +512,34 @@ export default function App() {
             >
               ibrahim
             </a>
-            <span className="hidden xs:inline text-neutral-400 dark:text-neutral-600">•</span>
-            <span className="inline-flex items-center gap-1.5">
-              <span>dreaming in code on</span>
+            <span className="hidden xs:inline text-neutral-300 dark:text-neutral-700">•</span>
+            <span className="inline-flex items-center gap-1">
+              <span>in tacit</span>
               <a
-                href="https://github.com/carbonthecoder"
+                href="https://cnrad.dev/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 font-bold text-neutral-900 dark:text-neutral-100 hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors group"
+                className="font-bold underline underline-offset-4 decoration-dotted text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white transition-colors"
+                title="Aesthetic provenance"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="w-3.5 h-3.5 fill-current transition-transform duration-150 group-hover:scale-110"
-                >
-                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                </svg>
-                <span className="underline underline-offset-4">@carbonthecoder</span>
+                concordance
               </a>
             </span>
+            <span className="hidden xs:inline text-neutral-300 dark:text-neutral-700">•</span>
+            <a
+              href="https://github.com/carbonthecoder"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 font-bold text-neutral-900 dark:text-neutral-100 hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors group"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="w-3.5 h-3.5 fill-current transition-transform duration-150 group-hover:scale-110"
+              >
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
+              <span className="underline underline-offset-4">@carbonthecoder</span>
+            </a>
           </div>
         </div>
       </footer>
