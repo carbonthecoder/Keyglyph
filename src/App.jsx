@@ -8,6 +8,8 @@ import { OptionsDrawer } from './components/OptionsDrawer';
 import { AdModal } from './components/AdModal';
 import { soundEngine } from './utils/audio';
 import { downloadSVG, downloadPNG } from './utils/export';
+import { KEYBOARD_LAYOUTS } from './utils/layouts';
+import { CURVE_TYPES } from './utils/curves';
 
 const DEFAULT_OPTIONS = {
   layout: 'qwerty',
@@ -161,6 +163,28 @@ export default function App() {
       color: isDark ? '#ffffff' : '#000000',
     });
     showToast('Reset to defaults');
+  };
+
+  const handleRandomizeOptions = () => {
+    const layoutKeys = Object.keys(KEYBOARD_LAYOUTS);
+    const curveKeys = CURVE_TYPES.map((c) => c.id);
+
+    const randomLayout = layoutKeys[Math.floor(Math.random() * layoutKeys.length)];
+    const randomCurve = curveKeys[Math.floor(Math.random() * curveKeys.length)];
+    const randomNumbers = Math.random() > 0.5;
+    const randomWidth = +(1.5 + Math.random() * 4).toFixed(1);
+
+    setOptions((prev) => ({
+      ...prev,
+      layout: randomLayout,
+      curveType: randomCurve,
+      showNumbers: randomNumbers,
+      strokeWidth: randomWidth,
+      // DO NOT CHANGE COLOR - keep existing color untouched!
+    }));
+
+    soundEngine.playKey();
+    showToast(`Randomized 🎲 (${randomCurve})`);
   };
 
   const handleStartExport = (type) => {
@@ -319,6 +343,7 @@ export default function App() {
         options={options}
         onChange={handleOptionChange}
         onReset={handleResetOptions}
+        onRandomize={handleRandomizeOptions}
         isDark={isDark}
       />
 

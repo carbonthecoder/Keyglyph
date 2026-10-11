@@ -8,7 +8,14 @@ export function Header({
 }) {
   return (
     <header className="w-full flex items-center justify-between px-4 sm:px-6 py-4 select-none z-30 font-mono">
-      {/* Left: Controls in Space Mono with grey hover effects */}
+      {/* Left: Keyglyph Brand in Syne font with max weight & grey hover */}
+      <div className="flex items-center gap-2">
+        <span className="font-syne font-extrabold tracking-tight text-base sm:text-lg text-neutral-900 dark:text-white hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors duration-200 select-none cursor-pointer">
+          keyglyph
+        </span>
+      </div>
+
+      {/* Right: Controls in Space Mono with grey hover effects */}
       <div className="flex items-center gap-2 font-mono">
         {/* Star on GitHub */}
         <a
@@ -47,13 +54,6 @@ export function Header({
             <Moon className="w-3.5 h-3.5 text-current" />
           )}
         </button>
-      </div>
-
-      {/* Right: Keyglyph Brand in Syne font with max weight & grey hover */}
-      <div className="flex items-center gap-2">
-        <span className="font-syne font-extrabold tracking-tight text-base sm:text-lg text-neutral-900 dark:text-white hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors duration-200 select-none cursor-pointer">
-          keyglyph
-        </span>
       </div>
     </header>
   );

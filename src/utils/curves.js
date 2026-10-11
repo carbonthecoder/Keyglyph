@@ -95,7 +95,7 @@ function getQuadraticBezierPath(points) {
 }
 
 /**
- * Cubic Bezier path
+ * Cubic Bezier path (Flowing calligraphic loops with smooth tangent weighting)
  */
 function getCubicBezierPath(points) {
   if (!points || points.length === 0) return '';
@@ -109,10 +109,11 @@ function getCubicBezierPath(points) {
     const p2 = points[i + 1];
     const p3 = points[Math.min(points.length - 1, i + 2)];
 
-    const cp1x = p1.x + (p2.x - p0.x) / 6;
-    const cp1y = p1.y + (p2.y - p0.y) / 6;
-    const cp2x = p2.x - (p3.x - p1.x) / 6;
-    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    // Tangent smoothing with 0.30 weight produces wide, sweeping loops
+    const cp1x = p1.x + (p2.x - p0.x) * 0.30;
+    const cp1y = p1.y + (p2.y - p0.y) * 0.30;
+    const cp2x = p2.x - (p3.x - p1.x) * 0.30;
+    const cp2y = p2.y - (p3.y - p1.y) * 0.30;
 
     path += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2.x} ${p2.y}`;
   }
@@ -121,9 +122,11 @@ function getCubicBezierPath(points) {
 }
 
 /**
- * Catmull-Rom Spline path (Centripetal / tension controlled)
+ * Centripetal Catmull-Rom Spline path (alpha = 0.5)
+ * Dynamically scales tension based on Euclidean chord distance between keys,
+ * ensuring taut, precise signature strokes without overshooting or cusps.
  */
-function getCatmullRomPath(points, tension = 0.5) {
+function getCatmullRomPath(points) {
   if (!points || points.length === 0) return '';
   if (points.length < 3) return getLinearPath(points);
 
@@ -135,10 +138,19 @@ function getCatmullRomPath(points, tension = 0.5) {
     const p2 = points[i + 1];
     const p3 = i < points.length - 2 ? points[i + 2] : p2;
 
-    const cp1x = p1.x + ((p2.x - p0.x) * tension) / 3;
-    const cp1y = p1.y + ((p2.y - p0.y) * tension) / 3;
-    const cp2x = p2.x - ((p3.x - p1.x) * tension) / 3;
-    const cp2y = p2.y - ((p3.y - p1.y) * tension) / 3;
+    const d01 = Math.pow(Math.hypot(p1.x - p0.x, p1.y - p0.y), 0.5) || 0.0001;
+    const d12 = Math.pow(Math.hypot(p2.x - p1.x, p2.y - p1.y), 0.5) || 0.0001;
+    const d23 = Math.pow(Math.hypot(p3.x - p2.x, p3.y - p2.y), 0.5) || 0.0001;
+
+    const m1x = ((p1.x - p0.x) / d01 + (p2.x - p1.x) / d12) * 0.5;
+    const m1y = ((p1.y - p0.y) / d01 + (p2.y - p1.y) / d12) * 0.5;
+    const m2x = ((p2.x - p1.x) / d12 + (p3.x - p2.x) / d23) * 0.5;
+    const m2y = ((p2.y - p1.y) / d12 + (p3.y - p2.y) / d23) * 0.5;
+
+    const cp1x = p1.x + (m1x * d12) / 3;
+    const cp1y = p1.y + (m1y * d12) / 3;
+    const cp2x = p2.x - (m2x * d12) / 3;
+    const cp2y = p2.y - (m2y * d12) / 3;
 
     path += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2.x} ${p2.y}`;
   }

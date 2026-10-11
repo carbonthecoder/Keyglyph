@@ -9,6 +9,7 @@ export function OptionsDrawer({
   options,
   onChange,
   onReset,
+  onRandomize,
   isDark = true,
 }) {
   if (!isOpen) return null;
@@ -165,13 +166,24 @@ export function OptionsDrawer({
         </div>
       </div>
 
-      {/* Reset to Defaults with grey hover effect */}
-      <button
-        onClick={onReset}
-        className="w-full mt-5 py-2 text-xs font-mono font-bold rounded-lg border transition-colors cursor-pointer border-neutral-300 dark:border-neutral-800 bg-neutral-100 dark:bg-[#121214] text-neutral-900 dark:text-neutral-200 hover:text-neutral-500 dark:hover:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-900"
-      >
-        Reset to Defaults
-      </button>
+      {/* Action Buttons: Randomize Settings (Keeps Color) & Reset to Defaults */}
+      <div className="mt-5 space-y-2 font-mono">
+        <button
+          onClick={onRandomize}
+          title="Randomize layout, curve, numbers row and stroke width (keeps your color untouched)"
+          className="w-full py-2 text-xs font-mono font-bold rounded-lg border transition-all cursor-pointer border-neutral-400 dark:border-neutral-700 bg-neutral-900 dark:bg-neutral-100 text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200 hover:text-neutral-300 dark:hover:text-neutral-700 shadow-sm flex items-center justify-center gap-1.5 active:scale-98"
+        >
+          <span>🎲</span>
+          <span>Randomize Settings</span>
+        </button>
+
+        <button
+          onClick={onReset}
+          className="w-full py-2 text-xs font-mono font-bold rounded-lg border transition-colors cursor-pointer border-neutral-300 dark:border-neutral-800 bg-neutral-100 dark:bg-[#121214] text-neutral-900 dark:text-neutral-200 hover:text-neutral-500 dark:hover:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-900"
+        >
+          Reset to Defaults
+        </button>
+      </div>
     </div>
   );
 }
