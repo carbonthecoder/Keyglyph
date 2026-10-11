@@ -10,12 +10,13 @@ export function SignatureOverlay({
   gradientPreset = 'sunset',
   strokeWidth = 3,
   showDots = false,
+  tension = 0.35,
   replayProgress = 1, // 0 to 1
   isDark = true,
 }) {
   const pathD = useMemo(() => {
-    return generateSvgPath(points, curveType);
-  }, [points, curveType]);
+    return generateSvgPath(points, curveType, tension);
+  }, [points, curveType, tension]);
 
   // Color & Gradient definitions
   const strokeColor = useMemo(() => {

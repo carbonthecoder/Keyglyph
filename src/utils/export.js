@@ -43,6 +43,35 @@ export function downloadSVG(svgElement, filename = 'keyglyph-signature.svg', isD
   URL.revokeObjectURL(url);
 }
 
+export async function copySVGToClipboard(svgElement, isDark = true) {
+  if (!svgElement) return false;
+
+  const rect = svgElement.getBoundingClientRect();
+  const width = Math.max(rect.width || svgElement.clientWidth || 800, 300);
+  const height = Math.max(rect.height || svgElement.clientHeight || 450, 200);
+
+  const clone = svgElement.cloneNode(true);
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  clone.setAttribute('width', width);
+  clone.setAttribute('height', height);
+  clone.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+  const paths = clone.querySelectorAll('path');
+  paths.forEach((p) => {
+    p.removeAttribute('style');
+    p.removeAttribute('stroke-dasharray');
+    p.removeAttribute('stroke-dashoffset');
+  });
+
+  const svgData = new XMLSerializer().serializeToString(clone);
+  try {
+    await navigator.clipboard.writeText(svgData);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
 export function downloadPNG(svgElement, filename = 'keyglyph-signature.png', scale = 2, isDark = true) {
   if (!svgElement) return;
 

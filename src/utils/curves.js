@@ -97,11 +97,12 @@ function getQuadraticBezierPath(points) {
 /**
  * Cubic Bezier path (Flowing calligraphic loops with smooth tangent weighting)
  */
-function getCubicBezierPath(points) {
+function getCubicBezierPath(points, tension = 0.30) {
   if (!points || points.length === 0) return '';
   if (points.length < 3) return getLinearPath(points);
 
   let path = `M ${points[0].x} ${points[0].y}`;
+  const t = Math.max(0.1, Math.min(0.6, tension));
 
   for (let i = 0; i < points.length - 1; i++) {
     const p0 = points[Math.max(0, i - 1)];
@@ -109,11 +110,11 @@ function getCubicBezierPath(points) {
     const p2 = points[i + 1];
     const p3 = points[Math.min(points.length - 1, i + 2)];
 
-    // Tangent smoothing with 0.30 weight produces wide, sweeping loops
-    const cp1x = p1.x + (p2.x - p0.x) * 0.30;
-    const cp1y = p1.y + (p2.y - p0.y) * 0.30;
-    const cp2x = p2.x - (p3.x - p1.x) * 0.30;
-    const cp2y = p2.y - (p3.y - p1.y) * 0.30;
+    // Tangent smoothing scaled by tension parameter
+    const cp1x = p1.x + (p2.x - p0.x) * t;
+    const cp1y = p1.y + (p2.y - p0.y) * t;
+    const cp2x = p2.x - (p3.x - p1.x) * t;
+    const cp2y = p2.y - (p3.y - p1.y) * t;
 
     path += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2.x} ${p2.y}`;
   }
@@ -126,11 +127,12 @@ function getCubicBezierPath(points) {
  * Dynamically scales tension based on Euclidean chord distance between keys,
  * ensuring taut, precise signature strokes without overshooting or cusps.
  */
-function getCatmullRomPath(points) {
+function getCatmullRomPath(points, tension = 0.5) {
   if (!points || points.length === 0) return '';
   if (points.length < 3) return getLinearPath(points);
 
   let path = `M ${points[0].x} ${points[0].y}`;
+  const scale = Math.max(0.2, Math.min(1.2, tension / 0.5));
 
   for (let i = 0; i < points.length - 1; i++) {
     const p0 = i > 0 ? points[i - 1] : points[i];
@@ -147,10 +149,10 @@ function getCatmullRomPath(points) {
     const m2x = ((p2.x - p1.x) / d12 + (p3.x - p2.x) / d23) * 0.5;
     const m2y = ((p2.y - p1.y) / d12 + (p3.y - p2.y) / d23) * 0.5;
 
-    const cp1x = p1.x + (m1x * d12) / 3;
-    const cp1y = p1.y + (m1y * d12) / 3;
-    const cp2x = p2.x - (m2x * d12) / 3;
-    const cp2y = p2.y - (m2y * d12) / 3;
+    const cp1x = p1.x + (m1x * d12 * scale) / 3;
+    const cp1y = p1.y + (m1y * d12 * scale) / 3;
+    const cp2x = p2.x - (m2x * d12 * scale) / 3;
+    const cp2y = p2.y - (m2y * d12 * scale) / 3;
 
     path += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2.x} ${p2.y}`;
   }
@@ -161,7 +163,7 @@ function getCatmullRomPath(points) {
 /**
  * Master dispatcher for SVG path generation based on selected curve style
  */
-export function generateSvgPath(points, curveType = 'linear') {
+export function generateSvgPath(points, curveType = 'linear', tension = 0.35) {
   if (!points || points.length === 0) return '';
   
   switch (curveType) {
@@ -170,9 +172,9 @@ export function generateSvgPath(points, curveType = 'linear') {
     case 'quadratic bezier':
       return getQuadraticBezierPath(points);
     case 'cubic bezier':
-      return getCubicBezierPath(points);
+      return getCubicBezierPath(points, tension);
     case 'catmull rom':
-      return getCatmullRomPath(points);
+      return getCatmullRomPath(points, tension);
     case 'linear':
     default:
       return getLinearPath(points);

@@ -164,6 +164,68 @@ export function OptionsDrawer({
             className="w-full h-1 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-black dark:accent-white"
           />
         </div>
+
+        {/* Curve Tension Slider */}
+        <div>
+          <div className="flex justify-between items-center mb-1">
+            <span className="font-bold text-neutral-800 dark:text-neutral-200">Curve Tension</span>
+            <span className="font-mono font-bold text-neutral-900 dark:text-neutral-300">
+              {Math.round((options.tension ?? 0.35) * 100)}%
+            </span>
+          </div>
+          <input
+            type="range"
+            min="15"
+            max="60"
+            value={Math.round((options.tension ?? 0.35) * 100)}
+            onChange={(e) => onChange('tension', parseInt(e.target.value, 10) / 100)}
+            className="w-full h-1 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-black dark:accent-white"
+          />
+        </div>
+
+        {/* Neon Glow Toggle */}
+        <div className="flex items-center justify-between">
+          <span className="font-bold text-neutral-800 dark:text-neutral-200">Neon Glow</span>
+          <button
+            type="button"
+            onClick={() => onChange('styleMode', options.styleMode === 'glow' ? 'solid' : 'glow')}
+            className={`w-9 h-5 rounded-full relative transition-colors duration-200 cursor-pointer ${
+              options.styleMode === 'glow'
+                ? isDark ? 'bg-white' : 'bg-black'
+                : isDark ? 'bg-neutral-800' : 'bg-neutral-300'
+            }`}
+          >
+            <div
+              className={`w-3.5 h-3.5 rounded-full absolute top-0.75 transition-transform duration-200 ${
+                options.styleMode === 'glow'
+                  ? isDark ? 'translate-x-4.5 bg-black' : 'translate-x-4.5 bg-white'
+                  : isDark ? 'translate-x-1 bg-neutral-400' : 'translate-x-1 bg-white'
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Key Nodes Toggle */}
+        <div className="flex items-center justify-between">
+          <span className="font-bold text-neutral-800 dark:text-neutral-200">Key Nodes</span>
+          <button
+            type="button"
+            onClick={() => onChange('showDots', !options.showDots)}
+            className={`w-9 h-5 rounded-full relative transition-colors duration-200 cursor-pointer ${
+              options.showDots
+                ? isDark ? 'bg-white' : 'bg-black'
+                : isDark ? 'bg-neutral-800' : 'bg-neutral-300'
+            }`}
+          >
+            <div
+              className={`w-3.5 h-3.5 rounded-full absolute top-0.75 transition-transform duration-200 ${
+                options.showDots
+                  ? isDark ? 'translate-x-4.5 bg-black' : 'translate-x-4.5 bg-white'
+                  : isDark ? 'translate-x-1 bg-neutral-400' : 'translate-x-1 bg-white'
+              }`}
+            />
+          </button>
+        </div>
       </div>
 
       {/* Action Buttons: Randomize Settings (Keeps Color) & Reset to Defaults */}

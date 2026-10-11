@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import confetti from 'canvas-confetti';
-import { Sliders, Download, Check } from 'lucide-react';
+import { Sliders, Download, Check, Copy, Play } from 'lucide-react';
 import { Header } from './components/Header';
 import { Keyboard } from './components/Keyboard';
 import { SignatureOverlay } from './components/SignatureOverlay';
 import { OptionsDrawer } from './components/OptionsDrawer';
 import { AdModal } from './components/AdModal';
 import { soundEngine } from './utils/audio';
-import { downloadSVG, downloadPNG } from './utils/export';
+import { downloadSVG, downloadPNG, copySVGToClipboard } from './utils/export';
 import { KEYBOARD_LAYOUTS } from './utils/layouts';
 import { CURVE_TYPES } from './utils/curves';
 
@@ -20,6 +20,7 @@ const DEFAULT_OPTIONS = {
   gradientPreset: 'cyberpunk',
   strokeWidth: 2.5,
   showDots: false,
+  tension: 0.35,
 };
 
 export default function App() {
@@ -35,6 +36,11 @@ export default function App() {
   // Keyboard auto-disappear state
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(true);
   const inactivityTimerRef = useRef(null);
+
+  // Replay animation state
+  const [isReplaying, setIsReplaying] = useState(false);
+  const [replayProgress, setReplayProgress] = useState(1);
+  const replayAnimRef = useRef(null);
 
   // Ad modal state
   const [isAdOpen, setIsAdOpen] = useState(false);
@@ -187,6 +193,64 @@ export default function App() {
     showToast(`Randomized 🎲 (${randomCurve})`);
   };
 
+  // Replay stroke animation
+  const handleReplay = useCallback(() => {
+    if (signaturePoints.length < 2 || isReplaying) return;
+    setIsReplaying(true);
+    setReplayProgress(0);
+    const startTime = performance.now();
+    const duration = Math.min(2200, Math.max(900, signaturePoints.length * 150));
+
+    const animate = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      // easeOutCubic curve for realistic pen flourish
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setReplayProgress(eased);
+
+      if (progress < 1) {
+        replayAnimRef.current = requestAnimationFrame(animate);
+      } else {
+        setIsReplaying(false);
+        setReplayProgress(1);
+      }
+    };
+
+    replayAnimRef.current = requestAnimationFrame(animate);
+  }, [signaturePoints.length, isReplaying]);
+
+  // Reset replay animation when user types new characters
+  useEffect(() => {
+    if (replayAnimRef.current) {
+      cancelAnimationFrame(replayAnimRef.current);
+      setIsReplaying(false);
+    }
+    setReplayProgress(1);
+  }, [inputText]);
+
+  useEffect(() => {
+    return () => {
+      if (replayAnimRef.current) cancelAnimationFrame(replayAnimRef.current);
+    };
+  }, []);
+
+  // 1-Click Copy SVG to clipboard
+  const handleCopySVG = async () => {
+    if (!inputText || signaturePoints.length < 2) {
+      showToast('Type a name first');
+      return;
+    }
+    if (svgRef.current) {
+      const success = await copySVGToClipboard(svgRef.current, isDark);
+      if (success) {
+        confetti({ particleCount: 30, spread: 50, origin: { y: 0.85 } });
+        showToast('SVG copied to clipboard! 📋');
+      } else {
+        showToast('Failed to copy SVG');
+      }
+    }
+  };
+
   const handleStartExport = (type) => {
     if (!inputText) {
       showToast('Type a name first');
@@ -288,13 +352,41 @@ export default function App() {
             color={options.color}
             strokeWidth={options.strokeWidth}
             showDots={options.showDots}
-            replayProgress={1}
+            tension={options.tension}
+            replayProgress={replayProgress}
             isDark={isDark}
           />
         </div>
 
-        {/* Clean Vercel Export Buttons with Space Mono and grey hover effect */}
-        <div className="mt-10 flex items-center gap-2.5 z-30 font-mono">
+        {/* Clean Vercel Action Buttons with Space Mono and grey hover effect */}
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-2.5 z-30 font-mono">
+          <button
+            onClick={handleReplay}
+            disabled={isReplaying || signaturePoints.length < 2}
+            className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+              isDark
+                ? 'bg-neutral-900 border border-neutral-800 text-neutral-200 hover:text-neutral-400 hover:bg-neutral-800'
+                : 'bg-neutral-100 border border-neutral-300 text-neutral-900 hover:text-neutral-500 hover:bg-neutral-200'
+            }`}
+            title="Replay stroke drawing animation"
+          >
+            <Play className={`w-3.5 h-3.5 ${isReplaying ? 'animate-pulse' : ''}`} />
+            <span>{isReplaying ? 'Playing...' : 'Replay'}</span>
+          </button>
+
+          <button
+            onClick={handleCopySVG}
+            className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
+              isDark
+                ? 'bg-neutral-900 border border-neutral-800 text-neutral-200 hover:text-neutral-400 hover:bg-neutral-800'
+                : 'bg-neutral-100 border border-neutral-300 text-neutral-900 hover:text-neutral-500 hover:bg-neutral-200'
+            }`}
+            title="Copy vector SVG to clipboard for Figma or Illustrator"
+          >
+            <Copy className="w-3.5 h-3.5" />
+            <span>Copy SVG</span>
+          </button>
+
           <button
             onClick={() => handleStartExport('SVG')}
             className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
@@ -320,6 +412,21 @@ export default function App() {
           </button>
         </div>
       </main>
+
+      {/* Footer: crafted by ibrahim */}
+      <footer className="w-full py-5 text-center z-30 font-mono select-none">
+        <p className="text-[11px] text-neutral-500 dark:text-neutral-400 font-mono">
+          crafted by{' '}
+          <a
+            href="https://ibrahim.is-cool.dev"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-bold underline underline-offset-4 text-neutral-900 dark:text-neutral-100 hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors"
+          >
+            ibrahim
+          </a>
+        </p>
+      </footer>
 
       {/* Bottom Right: Options Trigger Button */}
       <div className="fixed bottom-6 right-6 z-40 font-mono">
