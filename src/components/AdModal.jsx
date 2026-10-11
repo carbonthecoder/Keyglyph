@@ -57,7 +57,7 @@ export function AdModal({
           {isCompleted && (
             <button
               onClick={onClose}
-              className="p-1 rounded-md text-neutral-400 hover:text-black dark:hover:text-white transition-colors"
+              className="p-1 rounded-md text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -65,13 +65,13 @@ export function AdModal({
         </div>
 
         {/* Content - Simple Ads coming soon */}
-        <div className="py-3 flex flex-col items-center">
+        <div className="py-3 flex flex-col items-center font-sans font-extrabold">
           {!isCompleted ? (
             <>
-              <h3 className="font-semibold text-sm tracking-tight mb-1 text-neutral-900 dark:text-neutral-100">
+              <h3 className="font-extrabold text-sm tracking-tight mb-1 text-neutral-900 dark:text-neutral-100">
                 Ads coming soon
               </h3>
-              <p className="text-xs font-mono text-neutral-500 mb-5">
+              <p className="text-xs text-neutral-500 mb-5">
                 Unlocking {exportType} in {timeLeft}s
               </p>
 
@@ -88,10 +88,10 @@ export function AdModal({
               <div className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 flex items-center justify-center mb-2">
                 <Check className="w-4 h-4" />
               </div>
-              <h3 className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">
+              <h3 className="font-extrabold text-sm text-neutral-900 dark:text-neutral-100">
                 Unlocked
               </h3>
-              <p className="text-xs font-mono text-neutral-500 mt-1">
+              <p className="text-xs text-neutral-500 mt-1">
                 Downloading {exportType}...
               </p>
             </div>

@@ -232,7 +232,7 @@ export default function App() {
             }}
             placeholder="Enter your name"
             autoFocus
-            className={`w-full text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-center bg-transparent border-none outline-none transition-colors placeholder:text-neutral-400 dark:placeholder:text-neutral-700 ${
+            className={`w-full text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-sans font-extrabold tracking-tight text-center bg-transparent border-none outline-none transition-colors placeholder:text-neutral-400 dark:placeholder:text-neutral-700 ${
               isDark ? 'text-white' : 'text-black'
             }`}
           />
@@ -269,14 +269,14 @@ export default function App() {
           />
         </div>
 
-        {/* Clean Vercel Export Buttons */}
-        <div className="mt-10 flex items-center gap-2.5 z-30">
+        {/* Clean Vercel Export Buttons with Syne max weight and grey hover effect */}
+        <div className="mt-10 flex items-center gap-2.5 z-30 font-sans font-extrabold">
           <button
             onClick={() => handleStartExport('SVG')}
-            className={`h-8 px-3.5 text-xs font-medium rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 ${
+            className={`h-8 px-3.5 text-xs font-sans font-extrabold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
               isDark
-                ? 'bg-white text-black hover:bg-neutral-200'
-                : 'bg-black text-white hover:bg-neutral-800'
+                ? 'bg-white text-black hover:text-neutral-600 hover:bg-neutral-200'
+                : 'bg-black text-white hover:text-neutral-400 hover:bg-neutral-800'
             }`}
           >
             <Download className="w-3.5 h-3.5" />
@@ -285,10 +285,10 @@ export default function App() {
 
           <button
             onClick={() => handleStartExport('PNG')}
-            className={`h-8 px-3.5 text-xs font-medium rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 ${
+            className={`h-8 px-3.5 text-xs font-sans font-extrabold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
               isDark
-                ? 'bg-white text-black hover:bg-neutral-200'
-                : 'bg-black text-white hover:bg-neutral-800'
+                ? 'bg-white text-black hover:text-neutral-600 hover:bg-neutral-200'
+                : 'bg-black text-white hover:text-neutral-400 hover:bg-neutral-800'
             }`}
           >
             <Download className="w-3.5 h-3.5" />
@@ -298,13 +298,13 @@ export default function App() {
       </main>
 
       {/* Bottom Right: Options Trigger Button */}
-      <div className="fixed bottom-6 right-6 z-40">
+      <div className="fixed bottom-6 right-6 z-40 font-sans font-extrabold">
         <button
           onClick={() => setIsOptionsOpen(!isOptionsOpen)}
-          className={`h-8 px-3 rounded-lg text-xs font-semibold border transition-colors flex items-center gap-1.5 shadow-sm ${
+          className={`h-8 px-3 rounded-lg text-xs font-sans font-extrabold border transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer ${
             isDark
-              ? 'bg-black border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700'
-              : 'bg-neutral-100 border-neutral-300 text-neutral-900 hover:bg-neutral-200 hover:border-neutral-400'
+              ? 'bg-[#0a0a0a] border-neutral-800 text-neutral-200 hover:text-neutral-400 hover:bg-neutral-900 hover:border-neutral-700'
+              : 'bg-neutral-100 border-neutral-300 text-neutral-900 hover:text-neutral-500 hover:bg-neutral-200 hover:border-neutral-400'
           }`}
         >
           <Sliders className="w-3.5 h-3.5" />

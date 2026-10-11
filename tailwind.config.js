@@ -12,7 +12,8 @@ export default {
         darkBorder: '#232736',
       },
       fontFamily: {
-        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['Syne', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        syne: ['Syne', 'sans-serif'],
       }
     },
   },

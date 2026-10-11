@@ -25,36 +25,37 @@ export function OptionsDrawer({
 
   return (
     <div
-      className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-32px)] sm:w-84 max-w-sm rounded-xl p-5 shadow-2xl z-50 border transition-all duration-200 ${
+      className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-32px)] sm:w-84 max-w-sm rounded-xl p-5 shadow-2xl z-50 border transition-all duration-200 font-sans ${
         isDark
-          ? 'bg-black border-neutral-800 text-neutral-200 shadow-[0_8px_30px_rgb(0,0,0,0.8)]'
-          : 'bg-white border-neutral-300 text-neutral-900 shadow-[0_8px_30px_rgba(0,0,0,0.12)]'
+          ? 'bg-[#0a0a0a] border-neutral-800 text-neutral-200 shadow-[0_12px_40px_rgba(0,0,0,0.85)]'
+          : 'bg-white border-neutral-200 text-neutral-900 shadow-[0_12px_40px_rgba(0,0,0,0.12)]'
       }`}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-neutral-200 dark:border-neutral-800">
-        <span className="font-semibold text-xs tracking-tight text-neutral-900 dark:text-neutral-100">
+        <span className="font-extrabold text-xs tracking-tight text-neutral-900 dark:text-neutral-100">
           Configuration
         </span>
         <button
           onClick={onClose}
-          className="p-1 rounded-md text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white transition-colors"
+          aria-label="Close configuration"
+          className="p-1 rounded-md text-neutral-500 hover:text-neutral-400 dark:text-neutral-400 dark:hover:text-neutral-500 transition-colors cursor-pointer"
         >
-          <X className="w-3.5 h-3.5" />
+          <X className="w-4 h-4" />
         </button>
       </div>
 
       <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-0.5 text-xs">
         {/* Layout */}
         <div className="flex items-center justify-between">
-          <span className="font-medium text-neutral-700 dark:text-neutral-400">Layout</span>
+          <span className="font-extrabold text-neutral-800 dark:text-neutral-200">Layout</span>
           <select
             value={options.layout}
             onChange={(e) => onChange('layout', e.target.value)}
-            className={`h-7 px-2.5 rounded-md border outline-none font-mono text-xs cursor-pointer transition-colors ${
+            className={`h-7 px-2.5 rounded-md border outline-none font-sans font-extrabold text-xs cursor-pointer transition-colors ${
               isDark
-                ? 'bg-[#0a0a0a] border-neutral-800 text-white hover:border-neutral-700'
-                : 'bg-neutral-100 border-neutral-300 text-neutral-900 hover:border-neutral-400 font-medium'
+                ? 'bg-[#121214] border-neutral-800 text-white hover:border-neutral-700'
+                : 'bg-neutral-100 border-neutral-300 text-neutral-900 hover:border-neutral-400'
             }`}
           >
             {Object.entries(KEYBOARD_LAYOUTS).map(([key, item]) => (
@@ -67,22 +68,22 @@ export function OptionsDrawer({
 
         {/* Curve Selection */}
         <div>
-          <span className="font-medium text-neutral-700 dark:text-neutral-400 block mb-2">Curve</span>
-          <div className="flex flex-wrap gap-1 p-1 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg">
+          <span className="font-extrabold text-neutral-800 dark:text-neutral-200 block mb-2">Curve</span>
+          <div className="flex flex-wrap gap-1 p-1 bg-neutral-100 dark:bg-[#121214] border border-neutral-200 dark:border-neutral-800 rounded-lg">
             {CURVE_TYPES.map((curve) => {
               const isSelected = options.curveType === curve.id;
               return (
                 <button
                   key={curve.id}
                   onClick={() => onChange('curveType', curve.id)}
-                  className={`text-[11px] px-2 py-1 rounded-md transition-all font-mono ${
+                  className={`text-[11px] px-2 py-1 rounded-md transition-all font-sans font-extrabold cursor-pointer ${
                     isSelected
                       ? isDark
-                        ? 'bg-neutral-800 text-white shadow-sm font-semibold'
-                        : 'bg-black text-white shadow-sm font-semibold'
+                        ? 'bg-white text-black shadow-sm'
+                        : 'bg-black text-white shadow-sm'
                       : isDark
-                      ? 'text-neutral-400 hover:text-white'
-                      : 'text-neutral-700 hover:text-black font-medium'
+                      ? 'text-neutral-400 hover:text-neutral-300 hover:bg-neutral-800/60'
+                      : 'text-neutral-600 hover:text-neutral-400 hover:bg-neutral-200/60'
                   }`}
                 >
                   {curve.label}
@@ -94,7 +95,7 @@ export function OptionsDrawer({
 
         {/* Numbers Row Toggle */}
         <div className="flex items-center justify-between">
-          <span className="font-medium text-neutral-700 dark:text-neutral-400">Numbers Row</span>
+          <span className="font-extrabold text-neutral-800 dark:text-neutral-200">Numbers Row</span>
           <button
             type="button"
             onClick={() => onChange('showNumbers', !options.showNumbers)}
@@ -116,7 +117,7 @@ export function OptionsDrawer({
 
         {/* Color Palette */}
         <div className="flex items-center justify-between">
-          <span className="font-medium text-neutral-700 dark:text-neutral-400">Stroke Color</span>
+          <span className="font-extrabold text-neutral-800 dark:text-neutral-200">Stroke Color</span>
           <div className="flex items-center gap-1.5">
             <div className="flex gap-1">
               {colorPresets.map((c) => (
@@ -124,7 +125,7 @@ export function OptionsDrawer({
                   key={c}
                   onClick={() => onChange('color', c)}
                   style={{ backgroundColor: c }}
-                  className={`w-3.5 h-3.5 rounded-full border transition-transform ${
+                  className={`w-3.5 h-3.5 rounded-full border transition-transform cursor-pointer ${
                     options.color.toLowerCase() === c.toLowerCase()
                       ? 'scale-125 ring-2 ring-blue-500'
                       : 'border-neutral-400 dark:border-neutral-700 opacity-80 hover:opacity-100'
@@ -150,8 +151,8 @@ export function OptionsDrawer({
         {/* Stroke Width Slider */}
         <div>
           <div className="flex justify-between items-center mb-1">
-            <span className="font-medium text-neutral-700 dark:text-neutral-400">Stroke Width</span>
-            <span className="font-mono text-neutral-700 dark:text-neutral-500">{options.strokeWidth}px</span>
+            <span className="font-extrabold text-neutral-800 dark:text-neutral-200">Stroke Width</span>
+            <span className="font-sans font-extrabold text-neutral-900 dark:text-neutral-300">{options.strokeWidth}px</span>
           </div>
           <input
             type="range"
@@ -159,15 +160,15 @@ export function OptionsDrawer({
             max="8"
             value={options.strokeWidth}
             onChange={(e) => onChange('strokeWidth', parseInt(e.target.value, 10))}
-            className="w-full h-1 bg-neutral-300 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-black dark:accent-white"
+            className="w-full h-1 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-black dark:accent-white"
           />
         </div>
       </div>
 
-      {/* Reset to Defaults */}
+      {/* Reset to Defaults with grey hover effect */}
       <button
         onClick={onReset}
-        className="w-full mt-5 py-2 text-xs font-semibold rounded-lg border transition-colors border-neutral-300 dark:border-neutral-800 bg-neutral-100 dark:bg-black text-neutral-900 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-900"
+        className="w-full mt-5 py-2 text-xs font-extrabold rounded-lg border transition-colors cursor-pointer border-neutral-300 dark:border-neutral-800 bg-neutral-100 dark:bg-[#121214] text-neutral-900 dark:text-neutral-200 hover:text-neutral-500 dark:hover:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-900"
       >
         Reset to Defaults
       </button>
