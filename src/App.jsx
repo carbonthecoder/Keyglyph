@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import confetti from 'canvas-confetti';
-import { Sliders, Download, Check, Copy, Play } from 'lucide-react';
+import { Sliders, Download, Check, Copy, Play, Sparkles } from 'lucide-react';
 import { Header } from './components/Header';
 import { Keyboard } from './components/Keyboard';
 import { SignatureOverlay } from './components/SignatureOverlay';
@@ -41,6 +41,9 @@ export default function App() {
   const [isReplaying, setIsReplaying] = useState(false);
   const [replayProgress, setReplayProgress] = useState(1);
   const replayAnimRef = useRef(null);
+
+  // AI Sparkle copy state
+  const [isCopied, setIsCopied] = useState(false);
 
   // Ad modal state
   const [isAdOpen, setIsAdOpen] = useState(false);
@@ -241,17 +244,58 @@ export default function App() {
     };
   }, []);
 
-  // 1-Click Copy SVG to clipboard
+  // 1-Click Copy SVG with AI Starlight Sparkles
   const handleCopySVG = async () => {
     if (!inputText || signaturePoints.length < 2) {
-      showToast('Type a name first');
+      showToast('Type your name first');
       return;
     }
     if (svgRef.current) {
       const success = await copySVGToClipboard(svgRef.current, isDark);
       if (success) {
-        confetti({ particleCount: 30, spread: 50, origin: { y: 0.85 } });
-        showToast('SVG copied to clipboard! 📋');
+        // Multi-stage AI starlight sparkle burst
+        const defaults = {
+          origin: { y: 0.82 },
+          colors: ['#38bdf8', '#a855f7', '#ec4899', '#fbbf24', '#ffffff', '#06b6d4'],
+          shapes: ['star'],
+          disableForReducedMotion: true,
+        };
+
+        confetti({
+          ...defaults,
+          particleCount: 28,
+          spread: 45,
+          startVelocity: 36,
+          scalar: 1.25,
+          ticks: 90,
+        });
+
+        setTimeout(() => {
+          confetti({
+            ...defaults,
+            particleCount: 22,
+            spread: 85,
+            startVelocity: 42,
+            shapes: ['circle', 'star'],
+            scalar: 0.85,
+            ticks: 110,
+          });
+        }, 110);
+
+        setTimeout(() => {
+          confetti({
+            ...defaults,
+            particleCount: 16,
+            spread: 125,
+            startVelocity: 30,
+            scalar: 0.65,
+            ticks: 130,
+          });
+        }, 220);
+
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+        showToast('Vector SVG copied with AI sparkles ✨');
       } else {
         showToast('Failed to copy SVG');
       }
@@ -292,8 +336,12 @@ export default function App() {
     >
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-3 py-1.5 rounded-md bg-neutral-900 text-white dark:bg-neutral-100 dark:text-black text-xs font-mono border border-neutral-800 dark:border-neutral-200 shadow-xl flex items-center gap-2">
-          <Check className="w-3.5 h-3.5 text-emerald-500" />
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-3.5 py-1.5 rounded-full bg-neutral-900/95 text-white dark:bg-neutral-100/95 dark:text-black text-xs font-mono border border-neutral-700 dark:border-neutral-300 shadow-2xl backdrop-blur-md flex items-center gap-2">
+          {toastMessage.includes('✨') ? (
+            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse shrink-0" />
+          ) : (
+            <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+          )}
           <span>{toastMessage}</span>
         </div>
       )}
@@ -313,24 +361,40 @@ export default function App() {
 
       {/* Workspace */}
       <main className="flex-1 w-full max-w-4xl flex flex-col items-center justify-center px-4 py-8 relative">
-        {/* Name Input */}
-        <div className="mb-10 sm:mb-14 text-center cursor-text relative w-full">
-          <input
-            ref={textInputRef}
-            type="text"
-            value={inputText}
-            onChange={(e) => {
-              const val = e.target.value.slice(0, 35);
-              setInputText(val);
-              soundEngine.playKey();
-              resetInactivityTimer();
-            }}
-            placeholder="Enter your name"
-            autoFocus
-            className={`w-full text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-syne font-extrabold tracking-tight text-center bg-transparent border-none outline-none transition-colors placeholder:text-neutral-400 dark:placeholder:text-neutral-700 ${
-              isDark ? 'text-white' : 'text-black'
-            }`}
-          />
+        {/* Name Input with Underline */}
+        <div className="mb-10 sm:mb-14 text-center cursor-text relative w-full flex flex-col items-center">
+          <div className="relative inline-block max-w-xl w-full px-4">
+            <input
+              ref={textInputRef}
+              type="text"
+              value={inputText}
+              onChange={(e) => {
+                const val = e.target.value.slice(0, 35);
+                setInputText(val);
+                soundEngine.playKey();
+                resetInactivityTimer();
+              }}
+              placeholder="Enter your name"
+              autoFocus
+              className={`w-full text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-syne font-extrabold tracking-tight text-center bg-transparent border-none outline-none transition-colors pb-2 placeholder:text-neutral-400 dark:placeholder:text-neutral-700 ${
+                isDark ? 'text-white' : 'text-black'
+              }`}
+            />
+            {/* Ambient Underline */}
+            <div className="w-full flex justify-center mt-1">
+              <div
+                className={`h-[2px] transition-all duration-300 rounded-full ${
+                  inputText
+                    ? isDark
+                      ? 'w-3/4 max-w-md bg-gradient-to-r from-transparent via-cyan-400 via-fuchsia-400 to-transparent shadow-[0_0_12px_rgba(56,189,248,0.7)]'
+                      : 'w-3/4 max-w-md bg-gradient-to-r from-transparent via-violet-600 via-fuchsia-600 to-transparent shadow-[0_0_8px_rgba(124,58,237,0.35)]'
+                    : isDark
+                    ? 'w-44 sm:w-56 bg-gradient-to-r from-transparent via-neutral-600 to-transparent opacity-70'
+                    : 'w-44 sm:w-56 bg-gradient-to-r from-transparent via-neutral-300 to-transparent opacity-80'
+                }`}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Keyboard & Vector Signature Canvas */}
@@ -382,15 +446,26 @@ export default function App() {
 
           <button
             onClick={handleCopySVG}
-            className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
-              isDark
+            className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-200 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer relative overflow-hidden ${
+              isCopied
+                ? 'bg-gradient-to-r from-violet-600 via-fuchsia-600 to-cyan-500 text-white shadow-[0_0_16px_rgba(168,85,247,0.55)] border border-transparent scale-102'
+                : isDark
                 ? 'bg-neutral-900 border border-neutral-800 text-neutral-200 hover:text-neutral-400 hover:bg-neutral-800'
                 : 'bg-neutral-100 border border-neutral-300 text-neutral-900 hover:text-neutral-500 hover:bg-neutral-200'
             }`}
             title="Copy vector SVG to clipboard for Figma or Illustrator"
           >
-            <Copy className="w-3.5 h-3.5" />
-            <span>Copy SVG</span>
+            {isCopied ? (
+              <>
+                <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" />
+                <span className="tracking-wide">Copied! ✨</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-3.5 h-3.5" />
+                <span>Copy SVG</span>
+              </>
+            )}
           </button>
 
           <button
@@ -419,36 +494,41 @@ export default function App() {
         </div>
       </main>
 
-      {/* Cool Sentence-Style Footer with GitHub Icon & Link */}
-      <footer className="w-full py-6 px-4 text-center z-30 font-mono select-none">
-        <div className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 text-xs text-neutral-500 dark:text-neutral-400 font-mono">
-          <span>Every keystroke tells a story — crafted by</span>
-          <a
-            href="https://ibrahim.is-cool.dev"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-bold underline underline-offset-4 text-neutral-900 dark:text-neutral-100 hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors"
-          >
-            ibrahim
-          </a>
-          <span className="hidden xs:inline text-neutral-400 dark:text-neutral-600">•</span>
-          <span className="inline-flex items-center gap-1.5">
-            <span>find me on</span>
+      {/* AI & Emotional Words Footer */}
+      <footer className="w-full py-8 px-4 text-center z-30 font-mono select-none">
+        <div className="max-w-2xl mx-auto flex flex-col items-center gap-2.5">
+          <p className="text-xs sm:text-[13px] tracking-wide text-neutral-500 dark:text-neutral-400 leading-relaxed font-sans sm:font-mono italic">
+            "Where human emotion meets artificial intelligence — every keystroke leaves a digital soul in the machine."
+          </p>
+          <div className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 text-xs text-neutral-400 dark:text-neutral-500 font-mono">
+            <span>crafted with soul by</span>
             <a
-              href="https://github.com/carbonthecoder"
+              href="https://ibrahim.is-cool.dev"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 font-bold text-neutral-900 dark:text-neutral-100 hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors group"
+              className="font-bold underline underline-offset-4 text-neutral-900 dark:text-neutral-100 hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors"
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="w-3.5 h-3.5 fill-current transition-transform duration-150 group-hover:scale-110"
-              >
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-              </svg>
-              <span className="underline underline-offset-4">@carbonthecoder</span>
+              ibrahim
             </a>
-          </span>
+            <span className="hidden xs:inline text-neutral-400 dark:text-neutral-600">•</span>
+            <span className="inline-flex items-center gap-1.5">
+              <span>dreaming in code on</span>
+              <a
+                href="https://github.com/carbonthecoder"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 font-bold text-neutral-900 dark:text-neutral-100 hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors group"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="w-3.5 h-3.5 fill-current transition-transform duration-150 group-hover:scale-110"
+                >
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                </svg>
+                <span className="underline underline-offset-4">@carbonthecoder</span>
+              </a>
+            </span>
+          </div>
         </div>
       </footer>
 
