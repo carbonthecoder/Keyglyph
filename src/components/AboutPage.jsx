@@ -66,25 +66,22 @@ export function AboutPage({ isOpen, onClose, isDark = true }) {
           </p>
         </section>
 
-        {/* Section 2: # lineage */}
+        {/* Section 2: # inspiration */}
         <section className="mb-10 sm:mb-12">
           <h2 className="font-mono text-sm sm:text-base font-bold text-neutral-100 mb-3 flex items-center gap-1.5">
-            <span className="text-neutral-500 font-normal">#</span> lineage
+            <span className="text-neutral-500 font-normal">#</span> inspiration
           </h2>
-          <p className="font-mono text-xs sm:text-sm text-neutral-400 leading-relaxed font-normal mb-3">
-            an architectural derivation maintaining subtle aesthetic concordance with prior cartographic keystroke studies by{' '}
+          <p className="font-mono text-xs sm:text-sm text-neutral-400 leading-relaxed font-normal">
+            a creative nod to{' '}
             <a
               href="https://signature.cnrad.dev/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-neutral-300 underline underline-offset-4 hover:text-white transition-colors"
             >
-              cnrad
-            </a>
-            .
-          </p>
-          <p className="font-mono text-xs sm:text-sm text-neutral-400 leading-relaxed font-normal">
-            extended through parametric spline tension, multi-topological keyboard projections (colemak, dvorak, azerty, workman), synthetic acoustic resonance, and lossless vector serialization.
+              cnrad&apos;s
+            </a>{' '}
+            digitized signatures, taken further with extra layouts, adjustable curve tension, replay animation, and svg export.
           </p>
         </section>
 
