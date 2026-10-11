@@ -1,83 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Sun, Moon, Volume2, VolumeX, Star, ArrowRight } from 'lucide-react';
 
-function SlideToEnter({ onComplete }) {
-  const [dragProgress, setDragProgress] = useState(0); // 0 to 1
-  const [isDragging, setIsDragging] = useState(false);
-  const trackRef = useRef(null);
-
-  const updateProgress = (clientX) => {
-    if (!trackRef.current) return;
-    const rect = trackRef.current.getBoundingClientRect();
-    const handleWidth = 28;
-    const maxDrag = rect.width - handleWidth - 8;
-    const currentX = clientX - rect.left - 4;
-    const progress = Math.max(0, Math.min(1, currentX / maxDrag));
-    setDragProgress(progress);
-    if (progress >= 0.85) {
-      setIsDragging(false);
-      setDragProgress(0);
-      onComplete?.();
-    }
-  };
-
-  const handlePointerDown = (e) => {
-    e.stopPropagation();
-    setIsDragging(true);
-    e.currentTarget.setPointerCapture?.(e.pointerId);
-  };
-
-  const handlePointerMove = (e) => {
-    if (!isDragging) return;
-    updateProgress(e.clientX);
-  };
-
-  const handlePointerUp = () => {
-    if (dragProgress >= 0.75) {
-      onComplete?.();
-    }
-    setIsDragging(false);
-    setDragProgress(0);
-  };
-
-  return (
-    <div
-      ref={trackRef}
-      onClick={(e) => {
-        e.stopPropagation();
-        onComplete?.();
-      }}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
-      className="relative w-full h-8 bg-neutral-900 border border-neutral-800 rounded-md overflow-hidden flex items-center px-1 cursor-pointer select-none group"
-    >
-      {/* Background slide fill */}
-      <div
-        className="absolute left-0 top-0 bottom-0 bg-neutral-800 transition-all pointer-events-none"
-        style={{ width: `${Math.max(12, dragProgress * 100)}%` }}
-      />
-
-      {/* Label */}
-      <span className="w-full text-center text-[10px] font-mono text-neutral-400 group-hover:text-neutral-200 transition-colors pointer-events-none z-10 pl-5">
-        slide to enter about →
-      </span>
-
-      {/* Slider Knob */}
-      <div
-        onPointerDown={handlePointerDown}
-        style={{
-          transform: `translateX(${dragProgress * 180}px)`,
-          transition: isDragging ? 'none' : 'transform 0.18s ease-out',
-        }}
-        className="absolute left-1 w-6 h-6 rounded bg-neutral-200 text-black flex items-center justify-center text-xs font-bold shadow-sm cursor-grab active:cursor-grabbing z-20 hover:bg-white active:scale-95"
-      >
-        <ArrowRight className="w-3.5 h-3.5" />
-      </div>
-    </div>
-  );
-}
-
 export function Header({
   isDark,
   onToggleTheme,
@@ -103,7 +26,7 @@ export function Header({
 
   return (
     <header className="w-full flex items-center justify-between px-4 sm:px-6 py-4 select-none z-30 font-mono">
-      {/* Left: Keyglyph Brand with clean hover card & slide-to-enter */}
+      {/* Left: Keyglyph Brand with clean hover card */}
       <div
         className="relative"
         onMouseEnter={handleMouseEnter}
@@ -116,7 +39,7 @@ export function Header({
           <span>keyglyph</span>
         </button>
 
-        {/* Minimal Hover Card with Slide to Enter */}
+        {/* Minimal Hover Card */}
         {isCardOpen && (
           <div
             onMouseEnter={handleMouseEnter}
@@ -128,23 +51,22 @@ export function Header({
               <p className="text-[11px] text-neutral-400 leading-relaxed mb-3">
                 enter your name to generate a kinetic vector signature connecting keystroke coordinates across physical keyboard layouts.
               </p>
-              <SlideToEnter onComplete={onOpenAbout} />
+              <button
+                onClick={onOpenAbout}
+                className="w-full py-1.5 px-3 rounded-md bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs text-neutral-300 hover:text-white flex items-center justify-between transition-colors cursor-pointer group"
+              >
+                <span>read about</span>
+                <span className="text-neutral-500 group-hover:text-neutral-300 flex items-center gap-1">
+                  ~/about <ArrowRight className="w-3 h-3" />
+                </span>
+              </button>
             </div>
           </div>
         )}
       </div>
 
-      {/* Right: Controls in Space Mono with grey hover effects */}
+      {/* Right: Controls in Space Mono */}
       <div className="flex items-center gap-2 font-mono">
-        {/* Top Right: Minimal "about" Link Button */}
-        <button
-          onClick={onOpenAbout}
-          title="About Keyglyph"
-          className="h-8 px-2.5 sm:px-3 rounded-lg border transition-all text-xs font-mono font-bold flex items-center border-neutral-300 bg-neutral-100 text-neutral-900 hover:text-neutral-500 hover:bg-neutral-200 dark:border-neutral-800 dark:bg-black dark:text-neutral-300 dark:hover:text-white dark:hover:bg-neutral-900 shadow-sm cursor-pointer"
-        >
-          about
-        </button>
-
         {/* Star on GitHub */}
         <a
           href="https://github.com/carbonthecoder/Keyglyph"
