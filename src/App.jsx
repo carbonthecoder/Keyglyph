@@ -5,6 +5,7 @@ import { Header } from './components/Header';
 import { Keyboard } from './components/Keyboard';
 import { SignatureOverlay } from './components/SignatureOverlay';
 import { OptionsDrawer } from './components/OptionsDrawer';
+import { AboutPage } from './components/AboutPage';
 import { AdModal } from './components/AdModal';
 import { soundEngine } from './utils/audio';
 import { downloadSVG, downloadPNG, copySVGToClipboard } from './utils/export';
@@ -37,7 +38,25 @@ export default function App() {
 
   // Keyboard auto-disappear state
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(true);
-  const inactivityTimerRef = useRef(null);
+  const isHoveringBoardRef = useRef(false);
+  const hideTimerRef = useRef(null);
+
+  // About Page state
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
+
+  // Listen to browser hash (#about)
+  useEffect(() => {
+    const handleHash = () => {
+      setIsAboutOpen(window.location.hash === '#about');
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    window.addEventListener('popstate', handleHash);
+    return () => {
+      window.removeEventListener('hashchange', handleHash);
+      window.removeEventListener('popstate', handleHash);
+    };
+  }, []);
 
   // Replay animation state
   const [isReplaying, setIsReplaying] = useState(false);
@@ -54,20 +73,40 @@ export default function App() {
   const svgRef = useRef(null);
   const textInputRef = useRef(null);
 
-  // Timer to hide keypad only if user has entered text
-  const resetInactivityTimer = useCallback(() => {
-    setIsKeyboardVisible(true);
-    if (inactivityTimerRef.current) {
-      clearTimeout(inactivityTimerRef.current);
+  // Schedule disappearing after 2 seconds if not hovering the board
+  const scheduleKeyboardHide = useCallback(() => {
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
     }
-    // Only fade out keyboard if user has entered text
     const currentVal = textInputRef.current ? textInputRef.current.value : '';
-    if (currentVal && currentVal.trim().length > 0) {
-      inactivityTimerRef.current = setTimeout(() => {
-        setIsKeyboardVisible(false);
-      }, 2500);
+    if (currentVal && currentVal.trim().length > 0 && !isHoveringBoardRef.current) {
+      hideTimerRef.current = setTimeout(() => {
+        if (!isHoveringBoardRef.current) {
+          setIsKeyboardVisible(false);
+        }
+      }, 2000);
     }
   }, []);
+
+  const handleBoardMouseEnter = useCallback(() => {
+    isHoveringBoardRef.current = true;
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+    }
+    if (!isReplaying) {
+      setIsKeyboardVisible(true);
+    }
+  }, [isReplaying]);
+
+  const handleBoardMouseLeave = useCallback(() => {
+    isHoveringBoardRef.current = false;
+    scheduleKeyboardHide();
+  }, [scheduleKeyboardHide]);
+
+  const handleTypingActivity = useCallback(() => {
+    setIsKeyboardVisible(true);
+    scheduleKeyboardHide();
+  }, [scheduleKeyboardHide]);
 
   // Theme setup
   useEffect(() => {
@@ -75,11 +114,11 @@ export default function App() {
     if (savedTheme) {
       setIsDark(savedTheme === 'dark');
     }
-    resetInactivityTimer();
+    scheduleKeyboardHide();
     return () => {
-      if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     };
-  }, [resetInactivityTimer]);
+  }, [scheduleKeyboardHide]);
 
   useEffect(() => {
     if (isDark) {
@@ -124,16 +163,17 @@ export default function App() {
           setLastPressedKey(char);
           setTimeout(() => setLastPressedKey(null), 120);
         }
-        resetInactivityTimer();
+        handleTypingActivity();
         return;
       }
 
       if (e.key === 'Escape') {
         setIsOptionsOpen(false);
+        setIsAboutOpen(false);
         return;
       }
 
-      resetInactivityTimer();
+      handleTypingActivity();
 
       if (e.key === 'Backspace') {
         e.preventDefault();
@@ -153,7 +193,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [resetInactivityTimer]);
+  }, [handleTypingActivity]);
 
   // Virtual key click
   const handleVirtualKeyClick = (char) => {
@@ -161,7 +201,7 @@ export default function App() {
     setTimeout(() => setLastPressedKey(null), 120);
     setInputText((prev) => (prev + char.toLowerCase()).slice(0, 35));
     soundEngine.playKey();
-    resetInactivityTimer();
+    handleTypingActivity();
   };
 
   const handleOptionChange = (key, value) => {
@@ -359,6 +399,10 @@ export default function App() {
           soundEngine.enabled = next;
           showToast(next ? 'Sound on' : 'Sound off');
         }}
+        onOpenAbout={() => {
+          setIsAboutOpen(true);
+          window.location.hash = 'about';
+        }}
       />
 
       {/* Workspace */}
@@ -381,7 +425,7 @@ export default function App() {
                 const val = e.target.value.slice(0, 50);
                 setInputText(val);
                 soundEngine.playKey();
-                resetInactivityTimer();
+                handleTypingActivity();
                 // Ensure latest typed letter automatically scrolls into view side-to-side
                 requestAnimationFrame(() => {
                   if (textInputRef.current) {
@@ -402,22 +446,24 @@ export default function App() {
                 textDecoration: 'none',
               }}
             />
-            {/* Ambient Underline with Thick Sharp Animated Shades */}
-            <div className="w-full flex justify-center mt-1">
+            {/* Ambient Underline with Double Knife-Edge Sharp Tips & Color Shifting */}
+            <div className="w-full flex justify-center mt-1 filter drop-shadow-[0_0_12px_rgba(168,85,247,0.7)]">
               <div
-                className={`h-1 transition-all duration-300 rounded-none ${
+                className={`h-[6px] transition-all duration-300 ${
                   inputText
-                    ? 'w-full max-w-lg animate-shade-shift shadow-[0_0_16px_rgba(168,85,247,0.7)]'
+                    ? 'w-full max-w-lg animate-shade-shift'
                     : 'w-48 sm:w-60 bg-gradient-to-r from-transparent via-neutral-600 to-transparent opacity-60'
                 }`}
-                style={
-                  inputText
+                style={{
+                  clipPath:
+                    'polygon(16px 0%, calc(100% - 16px) 0%, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0% 50%)',
+                  ...(inputText
                     ? {
                         background:
                           'linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6, #fbbf24, #34d399, #38bdf8)',
                       }
-                    : undefined
-                }
+                    : {}),
+                }}
               />
             </div>
           </div>
@@ -426,8 +472,12 @@ export default function App() {
         {/* Keyboard & Vector Signature Canvas */}
         <div 
           className="relative inline-block mx-auto max-w-full"
-          onMouseEnter={() => { if (!isReplaying) setIsKeyboardVisible(true); }}
-          onClick={() => { if (!isReplaying) setIsKeyboardVisible(true); }}
+          onMouseEnter={handleBoardMouseEnter}
+          onMouseMove={handleBoardMouseEnter}
+          onMouseLeave={handleBoardMouseLeave}
+          onTouchStart={handleBoardMouseEnter}
+          onTouchEnd={handleBoardMouseLeave}
+          onClick={handleBoardMouseEnter}
         >
           <Keyboard
             layout={options.layout}
@@ -535,7 +585,7 @@ export default function App() {
               rel="noopener noreferrer"
               className="font-bold underline underline-offset-4 text-neutral-900 dark:text-neutral-100 hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors"
             >
-              ibrahim
+              carbon
             </a>
             <span className="hidden xs:inline text-neutral-300 dark:text-neutral-700">•</span>
             <span className="inline-flex items-center gap-1.5">
@@ -595,6 +645,18 @@ export default function App() {
         onClose={() => setIsAdOpen(false)}
         onRewardUnlocked={handleRewardUnlocked}
         exportType={pendingExportType}
+        isDark={isDark}
+      />
+
+      {/* What is Keyglyph Guide Page */}
+      <AboutPage
+        isOpen={isAboutOpen}
+        onClose={() => {
+          setIsAboutOpen(false);
+          if (window.location.hash === '#about') {
+            history.pushState('', document.title, window.location.pathname + window.location.search);
+          }
+        }}
         isDark={isDark}
       />
     </div>
