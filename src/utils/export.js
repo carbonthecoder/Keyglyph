@@ -134,8 +134,9 @@ export function downloadPNG(svgElement, filename = 'keyglyph-signature.png', sca
 
 export async function recordReplayVideo(
   svgElement,
-  filename = 'keyglyph-replay.webm',
+  filename = 'keyglyph-replay',
   isDark = true,
+  format = 'mp4',
   durationMs = 2200
 ) {
   if (!svgElement) return;
@@ -166,11 +167,32 @@ export async function recordReplayVideo(
   });
 
   const stream = canvas.captureStream(60);
-  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-    ? 'video/webm;codecs=vp9'
-    : MediaRecorder.isTypeSupported('video/webm')
-    ? 'video/webm'
-    : 'video/mp4';
+
+  let mimeType = 'video/webm';
+  let ext = 'webm';
+
+  if (format === 'mp4') {
+    if (MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')) {
+      mimeType = 'video/mp4;codecs=avc1';
+      ext = 'mp4';
+    } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+      mimeType = 'video/mp4';
+      ext = 'mp4';
+    } else {
+      mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+        ? 'video/webm;codecs=vp9'
+        : 'video/webm';
+      ext = 'webm';
+    }
+  } else {
+    mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+      ? 'video/webm;codecs=vp9'
+      : 'video/webm';
+    ext = 'webm';
+  }
+
+  const baseName = filename.replace(/\.(mp4|webm)$/i, '');
+  const finalFilename = `${baseName}.${ext}`;
 
   const mediaRecorder = new MediaRecorder(stream, {
     mimeType,
@@ -188,7 +210,7 @@ export async function recordReplayVideo(
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = filename;
+      link.download = finalFilename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

@@ -49,25 +49,38 @@
   background: rgba(150, 150, 150, 0.4);
 }
 
-/* Dynamic shifting gradient underline animation */
-@keyframes shadeShift {
+/* Dynamic shifting grey-white underline & realistic moving shadow animation */
+@keyframes silverShimmer {
   0% {
     background-position: 0% 50%;
-    filter: hue-rotate(0deg);
   }
   50% {
     background-position: 100% 50%;
-    filter: hue-rotate(90deg);
   }
   100% {
     background-position: 0% 50%;
-    filter: hue-rotate(0deg);
   }
 }
 
-.animate-shade-shift {
-  background-size: 300% 300%;
-  animation: shadeShift 4s ease infinite;
+@keyframes shadowDriftMove {
+  0% {
+    filter: drop-shadow(-8px 0 6px rgba(255, 255, 255, 0.35)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+  }
+  50% {
+    filter: drop-shadow(8px 0 8px rgba(255, 255, 255, 0.55)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
+  }
+  100% {
+    filter: drop-shadow(-8px 0 6px rgba(255, 255, 255, 0.35)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+  }
+}
+
+.animate-silver-sweep {
+  background-size: 200% 200%;
+  animation: silverShimmer 3s ease infinite;
+}
+
+.animate-shadow-move {
+  animation: shadowDriftMove 3s ease-in-out infinite;
 }
 
 /* iOS-style smooth spring animations */

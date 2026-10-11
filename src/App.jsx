@@ -114,6 +114,7 @@ export default function App() {
   const [isCopied, setIsCopied] = useState(false);
   const [isLinkCopied, setIsLinkCopied] = useState(false);
   const [isRecordingVideo, setIsRecordingVideo] = useState(false);
+  const [selectedVideoFormat, setSelectedVideoFormat] = useState('mp4');
 
   // Name Stacking state (default false every time)
   const [nameStacking, setNameStacking] = useState(false);
@@ -125,40 +126,27 @@ export default function App() {
   const svgRef = useRef(null);
   const textInputRef = useRef(null);
 
-  // Schedule disappearing after 2 seconds if not hovering the board
+  // Automatically hide keyboard after 1.8 seconds of inactivity
   const scheduleKeyboardHide = useCallback(() => {
     if (hideTimerRef.current) {
       clearTimeout(hideTimerRef.current);
     }
-    const currentVal = textInputRef.current ? textInputRef.current.value : '';
-    if (currentVal && currentVal.trim().length > 0 && !isHoveringBoardRef.current) {
-      hideTimerRef.current = setTimeout(() => {
-        if (!isHoveringBoardRef.current) {
-          setIsKeyboardVisible(false);
-        }
-      }, 2000);
-    }
+    hideTimerRef.current = setTimeout(() => {
+      setIsKeyboardVisible(false);
+    }, 1800);
   }, []);
 
-  const handleBoardMouseEnter = useCallback(() => {
-    isHoveringBoardRef.current = true;
-    if (hideTimerRef.current) {
-      clearTimeout(hideTimerRef.current);
-    }
+  // Show keys immediately and restart the 1.8s disappearance countdown
+  const triggerKeyboardActive = useCallback(() => {
     if (!isReplaying) {
       setIsKeyboardVisible(true);
+      scheduleKeyboardHide();
     }
-  }, [isReplaying]);
-
-  const handleBoardMouseLeave = useCallback(() => {
-    isHoveringBoardRef.current = false;
-    scheduleKeyboardHide();
-  }, [scheduleKeyboardHide]);
+  }, [isReplaying, scheduleKeyboardHide]);
 
   const handleTypingActivity = useCallback(() => {
-    setIsKeyboardVisible(true);
-    scheduleKeyboardHide();
-  }, [scheduleKeyboardHide]);
+    triggerKeyboardActive();
+  }, [triggerKeyboardActive]);
 
   // Theme setup
   useEffect(() => {
@@ -390,19 +378,19 @@ export default function App() {
     }
   }, [inputText, showToast]);
 
-  // Export 60fps video replay
-  const handleExportVideo = useCallback(async () => {
+  // Export 60fps video replay in selected format (MP4 or WebM)
+  const handleExportVideo = useCallback(async (format = 'mp4') => {
     if (!svgRef.current || isRecordingVideo) return;
     if (!inputText || signaturePoints.length < 2) {
       showToast('Type your name first');
       return;
     }
     setIsRecordingVideo(true);
-    showToast('Recording 60fps video...');
+    showToast(`Recording ${format.toUpperCase()} video...`);
     try {
       const slug = inputText.trim() ? inputText.trim().toLowerCase().replace(/\s+/g, '-') : 'keyglyph';
-      await recordReplayVideo(svgRef.current, `${slug}-replay.webm`, isDark);
-      showToast('Video downloaded');
+      await recordReplayVideo(svgRef.current, `${slug}-replay`, isDark, format);
+      showToast(`Video (${format.toUpperCase()}) downloaded`);
     } catch (err) {
       showToast('Video export failed');
     } finally {
@@ -508,23 +496,19 @@ export default function App() {
                 textDecoration: 'none',
               }}
             />
-            {/* Ambient Underline with Double Knife-Edge Sharp Tips & Color Shifting */}
-            <div className="w-full flex justify-center mt-1 filter drop-shadow-[0_0_12px_rgba(168,85,247,0.7)]">
+            {/* Ambient Underline: Thin knife-edge with sleek grey-white shimmer and realistic moving shadow */}
+            <div className="w-full flex justify-center mt-2 animate-shadow-move">
               <div
-                className={`h-[6px] transition-all duration-300 ${
+                className={`h-[2px] transition-all duration-300 ${
                   inputText
-                    ? 'w-full max-w-lg animate-shade-shift'
-                    : 'w-48 sm:w-60 bg-gradient-to-r from-transparent via-neutral-600 to-transparent opacity-60'
+                    ? 'w-full max-w-lg animate-silver-sweep'
+                    : 'w-44 sm:w-56 opacity-50'
                 }`}
                 style={{
                   clipPath:
-                    'polygon(16px 0%, calc(100% - 16px) 0%, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0% 50%)',
-                  ...(inputText
-                    ? {
-                        background:
-                          'linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6, #fbbf24, #34d399, #38bdf8)',
-                      }
-                    : {}),
+                    'polygon(10px 0%, calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0% 50%)',
+                  background:
+                    'linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(180,180,180,0.45) 25%, #ffffff 50%, rgba(180,180,180,0.45) 75%, rgba(255,255,255,0.05) 100%)',
                 }}
               />
             </div>
@@ -534,12 +518,10 @@ export default function App() {
         {/* Keyboard & Vector Signature Canvas */}
         <div 
           className="relative inline-block mx-auto max-w-full"
-          onMouseEnter={handleBoardMouseEnter}
-          onMouseMove={handleBoardMouseEnter}
-          onMouseLeave={handleBoardMouseLeave}
-          onTouchStart={handleBoardMouseEnter}
-          onTouchEnd={handleBoardMouseLeave}
-          onClick={handleBoardMouseEnter}
+          onMouseEnter={triggerKeyboardActive}
+          onMouseMove={triggerKeyboardActive}
+          onTouchStart={triggerKeyboardActive}
+          onClick={triggerKeyboardActive}
         >
           <Keyboard
             layout={options.layout}
@@ -550,7 +532,7 @@ export default function App() {
             onKeyPositionsUpdate={setKeyPositions}
             isDark={isDark}
             isVisible={isKeyboardVisible && !isReplaying}
-            onHover={() => { if (!isReplaying) setIsKeyboardVisible(true); }}
+            onHover={triggerKeyboardActive}
           />
 
           <SignatureOverlay
@@ -570,26 +552,24 @@ export default function App() {
           />
         </div>
 
-        {/* Minimal Name Stacking status below keyboard: pure monospace, no bulky button */}
-        {inputText && (
-          <div className="mt-3 text-center select-none font-mono text-[11px] text-neutral-500">
-            <span>name stacking: </span>
-            <button
-              onClick={() => {
-                const next = !nameStacking;
-                setNameStacking(next);
-                showToast(next ? 'Name stacking enabled' : 'Name stacking disabled');
-              }}
-              className={`cursor-pointer underline underline-offset-4 transition-colors ${
-                nameStacking
-                  ? 'text-neutral-100 font-bold'
-                  : 'text-neutral-400 hover:text-neutral-200'
-              }`}
-            >
-              {nameStacking ? 'enabled' : 'disabled'}
-            </button>
-          </div>
-        )}
+        {/* Minimal Name Stacking status below keyboard: pure monospace, always visible */}
+        <div className="mt-3 text-center select-none font-mono text-[11px] text-neutral-500">
+          <span>name stacking: </span>
+          <button
+            onClick={() => {
+              const next = !nameStacking;
+              setNameStacking(next);
+              showToast(next ? 'Name stacking enabled' : 'Name stacking disabled');
+            }}
+            className={`cursor-pointer underline underline-offset-4 transition-colors ${
+              nameStacking
+                ? 'text-neutral-100 font-bold'
+                : 'text-neutral-400 hover:text-neutral-200'
+            }`}
+          >
+            {nameStacking ? 'enabled' : 'disabled'}
+          </button>
+        </div>
 
         {/* Action Buttons: Only show when user has entered text */}
         {inputText && inputText.trim().length > 0 && (
@@ -636,11 +616,7 @@ export default function App() {
             <button
               onClick={handleCopySVG}
               className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
-                isCopied
-                  ? isDark
-                    ? 'bg-neutral-800 text-white border border-neutral-700'
-                    : 'bg-neutral-200 text-black border border-neutral-300'
-                  : isDark
+                isDark
                   ? 'bg-neutral-900 border border-neutral-800 text-neutral-200 hover:text-neutral-400 hover:bg-neutral-800'
                   : 'bg-neutral-100 border border-neutral-300 text-neutral-900 hover:text-neutral-500 hover:bg-neutral-200'
               }`}
@@ -659,21 +635,56 @@ export default function App() {
               )}
             </button>
 
-            <button
-              onClick={handleExportVideo}
-              disabled={isRecordingVideo}
-              className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
-                isRecordingVideo ? 'opacity-60 cursor-not-allowed' : ''
-              } ${
-                isDark
-                  ? 'bg-neutral-900 border border-neutral-800 text-neutral-200 hover:text-neutral-400 hover:bg-neutral-800'
-                  : 'bg-neutral-100 border border-neutral-300 text-neutral-900 hover:text-neutral-500 hover:bg-neutral-200'
-              }`}
-              title="Export high-definition 60fps replay video for X & LinkedIn"
-            >
-              <Video className={`w-3.5 h-3.5 ${isRecordingVideo ? 'animate-pulse text-amber-500' : ''}`} />
-              <span>{isRecordingVideo ? 'Recording...' : 'Export Video'}</span>
-            </button>
+            <div className={`inline-flex items-center rounded-lg border shadow-sm font-mono text-xs ${
+              isDark ? 'border-neutral-800 bg-neutral-900' : 'border-neutral-300 bg-neutral-100'
+            }`}>
+              <button
+                onClick={() => handleExportVideo(selectedVideoFormat)}
+                disabled={isRecordingVideo}
+                className={`h-8 px-3 text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer rounded-l-lg ${
+                  isRecordingVideo
+                    ? 'opacity-60 cursor-not-allowed'
+                    : isDark
+                    ? 'text-neutral-200 hover:text-white hover:bg-neutral-800'
+                    : 'text-neutral-900 hover:text-black hover:bg-neutral-200'
+                }`}
+                title={`Export video as .${selectedVideoFormat}`}
+              >
+                <Video className={`w-3.5 h-3.5 ${isRecordingVideo ? 'animate-pulse text-amber-500' : ''}`} />
+                <span>{isRecordingVideo ? 'Recording...' : 'Export Video'}</span>
+              </button>
+              <div className={`h-4 w-px ${isDark ? 'bg-neutral-800' : 'bg-neutral-300'}`} />
+              <div className="flex items-center gap-0.5 px-1.5">
+                <button
+                  onClick={() => setSelectedVideoFormat('mp4')}
+                  className={`px-1.5 py-0.5 text-[10px] rounded cursor-pointer transition-colors ${
+                    selectedVideoFormat === 'mp4'
+                      ? isDark
+                        ? 'bg-neutral-800 text-white font-bold'
+                        : 'bg-neutral-300 text-black font-bold'
+                      : isDark
+                      ? 'text-neutral-400 hover:text-neutral-200'
+                      : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
+                >
+                  mp4
+                </button>
+                <button
+                  onClick={() => setSelectedVideoFormat('webm')}
+                  className={`px-1.5 py-0.5 text-[10px] rounded cursor-pointer transition-colors ${
+                    selectedVideoFormat === 'webm'
+                      ? isDark
+                        ? 'bg-neutral-800 text-white font-bold'
+                        : 'bg-neutral-300 text-black font-bold'
+                      : isDark
+                      ? 'text-neutral-400 hover:text-neutral-200'
+                      : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
+                >
+                  webm
+                </button>
+              </div>
+            </div>
 
             <button
               onClick={() => handleStartExport('SVG')}
@@ -703,49 +714,50 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full mt-auto py-8 px-6 sm:px-12 select-none font-mono z-30">
+      <footer className="w-full mt-auto py-8 px-6 sm:px-12 select-none font-mono z-30 relative">
+        {/* Options Button: Positioned cleanly ABOVE the divider line */}
+        {!isOptionsOpen && (
+          <div className="w-full flex justify-end mb-4">
+            <button
+              onClick={() => setIsOptionsOpen(true)}
+              className="px-3.5 py-1.5 rounded-lg bg-neutral-950 border border-neutral-800 cursor-pointer text-xs font-mono font-medium text-neutral-300 hover:text-white hover:border-neutral-700 transition-colors shadow-lg"
+            >
+              Options
+            </button>
+          </div>
+        )}
+
+        {/* Full-width Divider Line */}
         <div className="w-full border-t border-neutral-300 dark:border-neutral-800 mb-6" />
-        <div className="w-full flex flex-col items-start gap-2 text-xs text-neutral-500 max-w-2xl sm:pr-28">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-left">
-            <div className="flex items-center gap-1.5 text-neutral-900 dark:text-neutral-300">
-              <span>©</span>
-              <span>crafted by</span>
-              <a
-                href="https://ibrahim.is-cool.dev"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-bold underline underline-offset-4 text-neutral-900 dark:text-neutral-100 hover:text-neutral-400 transition-colors"
-              >
-                carbon
-              </a>
-              <span className="text-neutral-400 dark:text-neutral-600">(</span>
-              <a
-                href="https://github.com/carbonthecoder"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-300 transition-colors underline underline-offset-2"
-              >
-                @carbonthecoder
-              </a>
-              <span className="text-neutral-400 dark:text-neutral-600">)</span>
-            </div>
-            <span className="hidden sm:inline text-neutral-400 dark:text-neutral-700">•</span>
-            <span className="text-[11px] text-neutral-500">
-              All works ©. Do not reproduce without the expressed written consent of carbon.
-            </span>
+
+        {/* Bottom Content: Clean credit and GitHub profile with icon */}
+        <div className="w-full flex items-center justify-between text-xs text-neutral-500">
+          <div className="flex items-center gap-2 text-neutral-900 dark:text-neutral-300">
+            <span>©</span>
+            <span>crafted by</span>
+            <a
+              href="https://ibrahim.is-cool.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold underline underline-offset-4 text-neutral-900 dark:text-neutral-100 hover:text-neutral-400 transition-colors"
+            >
+              carbon
+            </a>
+            <span className="text-neutral-400 dark:text-neutral-700">•</span>
+            <a
+              href="https://github.com/carbonthecoder"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
+            >
+              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
+              <span className="underline underline-offset-4">@carbonthecoder</span>
+            </a>
           </div>
         </div>
       </footer>
-
-      {/* Bottom Right: Options Trigger Button */}
-      {!isOptionsOpen && (
-        <button
-          onClick={() => setIsOptionsOpen(true)}
-          className="fixed bottom-6 right-6 px-4 py-2 rounded-lg bg-neutral-950 border-neutral-800/50 border cursor-pointer text-sm font-medium text-neutral-200 hover:text-white hover:border-neutral-700 transition-colors z-40 font-sans shadow-lg"
-        >
-          Options
-        </button>
-      )}
 
       {/* Options Drawer */}
       <OptionsDrawer
