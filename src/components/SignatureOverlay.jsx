@@ -8,6 +8,8 @@ export function SignatureOverlay({
   styleMode = 'solid', // 'solid' | 'gradient' | 'glow'
   color = '#ffffff',
   gradientPreset = 'sunset',
+  gradientStart = '#ff6b6b',
+  gradientEnd = '#4ecdc4',
   strokeWidth = 3,
   showDots = false,
   tension = 0.35,
@@ -78,8 +80,8 @@ export function SignatureOverlay({
       <defs>
         {/* Gradient Definition */}
         <linearGradient id="signature-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={activeGradient[0]} />
-          <stop offset="100%" stopColor={activeGradient[1]} />
+          <stop offset="0%" stopColor={gradientStart || activeGradient[0]} />
+          <stop offset="100%" stopColor={gradientEnd || activeGradient[1]} />
         </linearGradient>
 
         {/* Glow Filter */}

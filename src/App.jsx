@@ -17,6 +17,8 @@ const DEFAULT_OPTIONS = {
   showNumbers: false,
   styleMode: 'solid',
   color: '#ffffff',
+  gradientStart: '#ff6b6b',
+  gradientEnd: '#4ecdc4',
   gradientPreset: 'cyberpunk',
   strokeWidth: 2.5,
   showDots: false,
@@ -368,6 +370,13 @@ export default function App() {
               ref={textInputRef}
               type="text"
               value={inputText}
+              spellCheck={false}
+              autoCorrect="off"
+              autoCapitalize="off"
+              autoComplete="off"
+              data-gramm="false"
+              data-gramm_editor="false"
+              data-enable-grammarly="false"
               onChange={(e) => {
                 const val = e.target.value.slice(0, 50);
                 setInputText(val);
@@ -389,14 +398,17 @@ export default function App() {
                   ? 'text-2xl sm:text-3xl md:text-4xl'
                   : 'text-2xl xs:text-3xl sm:text-4xl md:text-5xl'
               } ${isDark ? 'text-white' : 'text-black'}`}
+              style={{
+                textDecoration: 'none',
+              }}
             />
-            {/* Ambient Underline with Cool Changing Shades */}
+            {/* Ambient Underline with Thick Sharp Animated Shades */}
             <div className="w-full flex justify-center mt-1">
               <div
-                className={`h-[2.5px] transition-all duration-500 rounded-full ${
+                className={`h-1 transition-all duration-300 rounded-none ${
                   inputText
-                    ? 'w-full max-w-md animate-shade-shift shadow-[0_0_14px_rgba(168,85,247,0.65)]'
-                    : 'w-44 sm:w-56 bg-gradient-to-r from-transparent via-neutral-600 to-transparent opacity-60'
+                    ? 'w-full max-w-lg animate-shade-shift shadow-[0_0_16px_rgba(168,85,247,0.7)]'
+                    : 'w-48 sm:w-60 bg-gradient-to-r from-transparent via-neutral-600 to-transparent opacity-60'
                 }`}
                 style={
                   inputText
@@ -435,6 +447,8 @@ export default function App() {
             curveType={options.curveType}
             styleMode={options.styleMode}
             color={options.color}
+            gradientStart={options.gradientStart}
+            gradientEnd={options.gradientEnd}
             strokeWidth={options.strokeWidth}
             showDots={options.showDots}
             tension={options.tension}
@@ -555,19 +569,14 @@ export default function App() {
       </footer>
 
       {/* Bottom Right: Options Trigger Button */}
-      <div className="fixed bottom-6 right-6 z-40 font-mono">
+      {!isOptionsOpen && (
         <button
-          onClick={() => setIsOptionsOpen(!isOptionsOpen)}
-          className={`h-8 px-3 rounded-lg text-xs font-mono font-bold border transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer ${
-            isDark
-              ? 'bg-[#0a0a0a] border-neutral-800 text-neutral-200 hover:text-neutral-400 hover:bg-neutral-900 hover:border-neutral-700'
-              : 'bg-neutral-100 border-neutral-300 text-neutral-900 hover:text-neutral-500 hover:bg-neutral-200 hover:border-neutral-400'
-          }`}
+          onClick={() => setIsOptionsOpen(true)}
+          className="fixed bottom-6 right-6 px-4 py-2 rounded-lg bg-neutral-950 border-neutral-800/50 border cursor-pointer text-sm font-medium text-neutral-200 hover:text-white hover:border-neutral-700 transition-colors z-40 font-sans shadow-lg"
         >
-          <Sliders className="w-3.5 h-3.5" />
-          <span>Options</span>
+          Options
         </button>
-      </div>
+      )}
 
       {/* Options Drawer */}
       <OptionsDrawer

@@ -1,7 +1,6 @@
 import React from 'react';
 import { CURVE_TYPES } from '../utils/curves';
 import { KEYBOARD_LAYOUTS } from '../utils/layouts';
-import { X } from 'lucide-react';
 
 export function OptionsDrawer({
   isOpen,
@@ -17,242 +16,239 @@ export function OptionsDrawer({
   const colorPresets = [
     '#ffffff',
     '#000000',
-    '#3b82f6',
-    '#10b981',
-    '#f59e0b',
+    '#38bdf8',
+    '#a855f7',
     '#ec4899',
-    '#8b5cf6',
+    '#22c55e',
   ];
 
   return (
     <div
-      className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-32px)] sm:w-84 max-w-sm rounded-xl p-5 shadow-2xl z-50 border transition-all duration-200 font-mono ${
-        isDark
-          ? 'bg-[#0a0a0a] border-neutral-800 text-neutral-200 shadow-[0_12px_40px_rgba(0,0,0,0.85)]'
-          : 'bg-white border-neutral-200 text-neutral-900 shadow-[0_12px_40px_rgba(0,0,0,0.12)]'
-      }`}
+      className="flex flex-col items-start fixed sm:absolute bottom-6 sm:right-6 max-sm:-translate-x-1/2 max-sm:left-1/2 max-sm:w-[calc(100%-3rem)] sm:max-w-xs p-4 rounded-xl bg-neutral-950 border-neutral-800/50 border z-50 text-white shadow-2xl font-sans"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4 pb-3 border-b border-neutral-200 dark:border-neutral-800">
-        <span className="font-bold text-xs tracking-tight text-neutral-900 dark:text-neutral-100">
-          Configuration
-        </span>
-        <button
-          onClick={onClose}
-          aria-label="Close configuration"
-          className="p-1 rounded-md text-neutral-500 hover:text-neutral-400 dark:text-neutral-400 dark:hover:text-neutral-500 transition-colors cursor-pointer"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
+      {/* Close button & Title */}
+      <button
+        onClick={onClose}
+        className="text-sm text-neutral-600 hover:text-neutral-400 absolute right-4 top-4 cursor-pointer font-medium transition-colors"
+      >
+        Close
+      </button>
+      <p className="font-semibold text-neutral-400 mb-4 text-sm">Options</p>
 
-      <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-0.5 text-xs">
+      {/* Grid: Exactly 5rem label column + 1fr controls */}
+      <div className="grid grid-cols-[5rem_1fr] gap-y-4 items-center w-full text-sm">
         {/* Layout */}
-        <div className="flex items-center justify-between">
-          <span className="font-bold text-neutral-800 dark:text-neutral-200">Layout</span>
-          <select
-            value={options.layout}
-            onChange={(e) => onChange('layout', e.target.value)}
-            className={`h-7 px-2.5 rounded-md border outline-none font-mono font-bold text-xs cursor-pointer transition-colors ${
-              isDark
-                ? 'bg-[#121214] border-neutral-800 text-white hover:border-neutral-700'
-                : 'bg-neutral-100 border-neutral-300 text-neutral-900 hover:border-neutral-400'
-            }`}
-          >
-            {Object.entries(KEYBOARD_LAYOUTS).map(([key, item]) => (
-              <option key={key} value={key} className={isDark ? 'bg-black text-white' : 'bg-white text-black'}>
-                {item.name.toLowerCase()}
-              </option>
-            ))}
-          </select>
+        <label htmlFor="keyboard-layout" className="text-neutral-300 text-sm font-medium mr-8 mt-1">
+          Layout
+        </label>
+        <select
+          id="keyboard-layout"
+          value={options.layout}
+          onChange={(e) => onChange('layout', e.target.value)}
+          className="border border-neutral-800 rounded-md px-2 py-1 bg-neutral-900 text-white text-sm outline-none cursor-pointer"
+        >
+          {Object.entries(KEYBOARD_LAYOUTS).map(([key, item]) => (
+            <option key={key} value={key} className="text-neutral-300 bg-neutral-900">
+              {item.name.toUpperCase()}
+            </option>
+          ))}
+        </select>
+
+        {/* Curve */}
+        <p className="text-neutral-300 text-sm font-medium mr-8 mt-1">Curve</p>
+        <div className="flex flex-wrap gap-1">
+          {CURVE_TYPES.map((curve) => (
+            <button
+              key={curve.id}
+              type="button"
+              onClick={() => onChange('curveType', curve.id)}
+              className={`px-3 py-1 text-xs rounded-full transition-all duration-150 ease-out cursor-pointer border ${
+                options.curveType === curve.id
+                  ? 'bg-white text-black font-medium border-white'
+                  : 'bg-neutral-900/50 text-neutral-400 hover:bg-neutral-800/50 hover:text-neutral-200 border-neutral-800'
+              }`}
+            >
+              {curve.label}
+            </button>
+          ))}
         </div>
 
-        {/* Curve Selection */}
-        <div>
-          <span className="font-bold text-neutral-800 dark:text-neutral-200 block mb-2">Curve</span>
-          <div className="flex flex-wrap gap-1 p-1 bg-neutral-100 dark:bg-[#121214] border border-neutral-200 dark:border-neutral-800 rounded-lg">
-            {CURVE_TYPES.map((curve) => {
-              const isSelected = options.curveType === curve.id;
-              return (
-                <button
-                  key={curve.id}
-                  onClick={() => onChange('curveType', curve.id)}
-                  className={`text-[11px] px-2 py-1 rounded-md transition-all font-mono font-bold cursor-pointer ${
-                    isSelected
-                      ? isDark
-                        ? 'bg-white text-black shadow-sm'
-                        : 'bg-black text-white shadow-sm'
-                      : isDark
-                      ? 'text-neutral-400 hover:text-neutral-300 hover:bg-neutral-800/60'
-                      : 'text-neutral-600 hover:text-neutral-400 hover:bg-neutral-200/60'
-                  }`}
-                >
-                  {curve.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Numbers Row Toggle */}
-        <div className="flex items-center justify-between">
-          <span className="font-bold text-neutral-800 dark:text-neutral-200">Numbers Row</span>
-          <button
-            type="button"
-            onClick={() => onChange('showNumbers', !options.showNumbers)}
-            className={`w-9 h-5 rounded-full relative transition-colors duration-200 cursor-pointer ${
-              options.showNumbers
-                ? isDark ? 'bg-white' : 'bg-black'
-                : isDark ? 'bg-neutral-800' : 'bg-neutral-300'
+        {/* Numbers Row */}
+        <p className="text-neutral-300 text-sm font-medium mr-8">Numbers</p>
+        <label className="flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            checked={options.showNumbers}
+            onChange={(e) => onChange('showNumbers', e.target.checked)}
+            className="sr-only"
+          />
+          <div
+            className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
+              options.showNumbers ? 'bg-white' : 'bg-neutral-700'
             }`}
           >
             <div
-              className={`w-3.5 h-3.5 rounded-full absolute top-0.75 transition-transform duration-200 ${
-                options.showNumbers
-                  ? isDark ? 'translate-x-4.5 bg-black' : 'translate-x-4.5 bg-white'
-                  : isDark ? 'translate-x-1 bg-neutral-400' : 'translate-x-1 bg-white'
+              className={`absolute top-0.5 left-0.5 w-4 h-4 bg-black rounded-full transition-transform duration-200 ${
+                options.showNumbers ? 'translate-x-5' : 'translate-x-0'
               }`}
             />
-          </button>
+          </div>
+        </label>
+
+        {/* Style */}
+        <p className="text-neutral-300 text-sm font-medium mr-8 mt-1">Style</p>
+        <div className="flex flex-wrap gap-1">
+          {['solid', 'gradient', 'glow'].map((style) => (
+            <button
+              key={style}
+              type="button"
+              onClick={() => onChange('styleMode', style)}
+              className={`px-3 py-1 text-xs rounded-full transition-all duration-150 ease-out cursor-pointer border capitalize ${
+                options.styleMode === style
+                  ? 'bg-white text-black font-medium border-white'
+                  : 'bg-neutral-900/50 text-neutral-400 hover:bg-neutral-800/50 hover:text-neutral-200 border-neutral-800'
+              }`}
+            >
+              {style}
+            </button>
+          ))}
         </div>
 
-        {/* Color Palette */}
-        <div className="flex items-center justify-between">
-          <span className="font-bold text-neutral-800 dark:text-neutral-200">Stroke Color</span>
-          <div className="flex items-center gap-1.5">
-            <div className="flex gap-1">
-              {colorPresets.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => onChange('color', c)}
-                  style={{ backgroundColor: c }}
-                  className={`w-3.5 h-3.5 rounded-full border transition-transform cursor-pointer ${
-                    options.color.toLowerCase() === c.toLowerCase()
-                      ? 'scale-125 ring-2 ring-blue-500'
-                      : 'border-neutral-400 dark:border-neutral-700 opacity-80 hover:opacity-100'
-                  }`}
+        {/* Color / Colors based on style */}
+        {options.styleMode === 'gradient' ? (
+          <>
+            <p className="text-neutral-300 text-sm font-medium mr-8 mt-1">Colors</p>
+            <div className="flex items-center gap-3">
+              <label className="relative cursor-pointer flex items-center gap-1.5">
+                <input
+                  type="color"
+                  value={options.gradientStart || '#ff6b6b'}
+                  onChange={(e) => onChange('gradientStart', e.target.value)}
+                  className="sr-only"
                 />
-              ))}
+                <div
+                  className="w-7 h-7 rounded-md border border-neutral-800 cursor-pointer shadow-inner"
+                  style={{ backgroundColor: options.gradientStart || '#ff6b6b' }}
+                />
+                <span className="text-neutral-400 text-xs">Start</span>
+              </label>
+              <label className="relative cursor-pointer flex items-center gap-1.5">
+                <input
+                  type="color"
+                  value={options.gradientEnd || '#4ecdc4'}
+                  onChange={(e) => onChange('gradientEnd', e.target.value)}
+                  className="sr-only"
+                />
+                <div
+                  className="w-7 h-7 rounded-md border border-neutral-800 cursor-pointer shadow-inner"
+                  style={{ backgroundColor: options.gradientEnd || '#4ecdc4' }}
+                />
+                <span className="text-neutral-400 text-xs">End</span>
+              </label>
             </div>
-            <label className="relative cursor-pointer ml-1">
-              <input
-                type="color"
-                value={options.color}
-                onChange={(e) => onChange('color', e.target.value)}
-                className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
-              />
-              <div
-                style={{ backgroundColor: options.color }}
-                className="w-5 h-5 rounded border border-neutral-400 dark:border-neutral-700 shadow-sm"
-              />
-            </label>
-          </div>
-        </div>
+          </>
+        ) : (
+          <>
+            <p className="text-neutral-300 text-sm font-medium mr-8 mt-1">Color</p>
+            <div className="flex items-center gap-2">
+              <label className="relative cursor-pointer">
+                <input
+                  type="color"
+                  value={options.color}
+                  onChange={(e) => onChange('color', e.target.value)}
+                  className="sr-only"
+                />
+                <div
+                  className="w-7 h-7 rounded-md border border-neutral-800 cursor-pointer shadow-inner hover:border-neutral-600 transition-colors"
+                  style={{ backgroundColor: options.color }}
+                />
+              </label>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {colorPresets.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => onChange('color', c)}
+                    className={`w-4 h-4 rounded-full border transition-transform cursor-pointer ${
+                      options.color.toLowerCase() === c.toLowerCase()
+                        ? 'scale-110 border-white ring-1 ring-white/50'
+                        : 'border-neutral-800 opacity-80 hover:opacity-100 hover:scale-105'
+                    }`}
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+              </div>
+            </div>
+          </>
+        )}
 
-        {/* Stroke Width Slider */}
-        <div>
-          <div className="flex justify-between items-center mb-1">
-            <span className="font-bold text-neutral-800 dark:text-neutral-200">Stroke Width</span>
-            <span className="font-mono font-bold text-neutral-900 dark:text-neutral-300">{options.strokeWidth}px</span>
-          </div>
+        {/* Width */}
+        <p className="text-neutral-300 text-sm font-medium mr-8 mt-1">Width</p>
+        <div className="flex items-center gap-2">
           <input
             type="range"
             min="1"
             max="8"
             value={options.strokeWidth}
             onChange={(e) => onChange('strokeWidth', parseInt(e.target.value, 10))}
-            className="w-full h-1 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-black dark:accent-white"
+            className="flex-1 accent-white cursor-pointer"
           />
+          <span className="text-neutral-400 text-xs w-6">{options.strokeWidth}px</span>
         </div>
 
-        {/* Curve Tension Slider */}
-        <div>
-          <div className="flex justify-between items-center mb-1">
-            <span className="font-bold text-neutral-800 dark:text-neutral-200">Curve Tension</span>
-            <span className="font-mono font-bold text-neutral-900 dark:text-neutral-300">
-              {Math.round((options.tension ?? 0.35) * 100)}%
-            </span>
-          </div>
+        {/* Tension */}
+        <p className="text-neutral-300 text-sm font-medium mr-8 mt-1">Tension</p>
+        <div className="flex items-center gap-2">
           <input
             type="range"
             min="10"
             max="75"
             step="1"
             value={Math.round((options.tension ?? 0.35) * 100)}
-            onChange={(e) => {
-              const val = parseInt(e.target.value, 10) / 100;
-              onChange('tension', val);
-              if (options.curveType === 'linear') {
-                onChange('curveType', 'cubic bezier');
-              }
-            }}
-            className="w-full h-1 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-black dark:accent-white"
+            onChange={(e) => onChange('tension', parseInt(e.target.value, 10) / 100)}
+            className="flex-1 accent-white cursor-pointer"
           />
+          <span className="text-neutral-400 text-xs w-6">{Math.round((options.tension ?? 0.35) * 100)}%</span>
         </div>
 
-        {/* Neon Glow Toggle */}
-        <div className="flex items-center justify-between">
-          <span className="font-bold text-neutral-800 dark:text-neutral-200">Neon Glow</span>
-          <button
-            type="button"
-            onClick={() => onChange('styleMode', options.styleMode === 'glow' ? 'solid' : 'glow')}
-            className={`w-9 h-5 rounded-full relative transition-colors duration-200 cursor-pointer ${
-              options.styleMode === 'glow'
-                ? isDark ? 'bg-white' : 'bg-black'
-                : isDark ? 'bg-neutral-800' : 'bg-neutral-300'
+        {/* Nodes */}
+        <p className="text-neutral-300 text-sm font-medium mr-8">Nodes</p>
+        <label className="flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            checked={options.showDots}
+            onChange={(e) => onChange('showDots', e.target.checked)}
+            className="sr-only"
+          />
+          <div
+            className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
+              options.showDots ? 'bg-white' : 'bg-neutral-700'
             }`}
           >
             <div
-              className={`w-3.5 h-3.5 rounded-full absolute top-0.75 transition-transform duration-200 ${
-                options.styleMode === 'glow'
-                  ? isDark ? 'translate-x-4.5 bg-black' : 'translate-x-4.5 bg-white'
-                  : isDark ? 'translate-x-1 bg-neutral-400' : 'translate-x-1 bg-white'
+              className={`absolute top-0.5 left-0.5 w-4 h-4 bg-black rounded-full transition-transform duration-200 ${
+                options.showDots ? 'translate-x-5' : 'translate-x-0'
               }`}
             />
-          </button>
-        </div>
-
-        {/* Key Nodes Toggle */}
-        <div className="flex items-center justify-between">
-          <span className="font-bold text-neutral-800 dark:text-neutral-200">Key Nodes</span>
-          <button
-            type="button"
-            onClick={() => onChange('showDots', !options.showDots)}
-            className={`w-9 h-5 rounded-full relative transition-colors duration-200 cursor-pointer ${
-              options.showDots
-                ? isDark ? 'bg-white' : 'bg-black'
-                : isDark ? 'bg-neutral-800' : 'bg-neutral-300'
-            }`}
-          >
-            <div
-              className={`w-3.5 h-3.5 rounded-full absolute top-0.75 transition-transform duration-200 ${
-                options.showDots
-                  ? isDark ? 'translate-x-4.5 bg-black' : 'translate-x-4.5 bg-white'
-                  : isDark ? 'translate-x-1 bg-neutral-400' : 'translate-x-1 bg-white'
-              }`}
-            />
-          </button>
-        </div>
+          </div>
+        </label>
       </div>
 
-      {/* Action Buttons: Randomize Settings (Keeps Color) & Reset to Defaults */}
-      <div className="mt-5 space-y-2 font-mono">
-        <button
-          onClick={onRandomize}
-          title="Randomize layout, curve, numbers row and stroke width (keeps your color untouched)"
-          className="w-full py-2 text-xs font-mono font-bold rounded-lg border transition-all cursor-pointer border-neutral-400 dark:border-neutral-700 bg-neutral-900 dark:bg-neutral-100 text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200 hover:text-neutral-300 dark:hover:text-neutral-700 shadow-sm flex items-center justify-center gap-1.5 active:scale-98"
-        >
-          <span>🎲</span>
-          <span>Randomize Settings</span>
-        </button>
+      {/* Action Buttons: Randomize & Reset */}
+      <button
+        onClick={onRandomize}
+        className="mt-4 w-full px-3 py-2 text-sm bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white rounded-md transition-colors duration-150 border border-neutral-800 cursor-pointer flex items-center justify-center gap-1.5 font-medium"
+      >
+        <span>🎲</span>
+        <span>Randomize</span>
+      </button>
 
-        <button
-          onClick={onReset}
-          className="w-full py-2 text-xs font-mono font-bold rounded-lg border transition-colors cursor-pointer border-neutral-300 dark:border-neutral-800 bg-neutral-100 dark:bg-[#121214] text-neutral-900 dark:text-neutral-200 hover:text-neutral-500 dark:hover:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-900"
-        >
-          Reset to Defaults
-        </button>
-      </div>
+      <button
+        onClick={onReset}
+        className="mt-2 w-full px-3 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white rounded-md transition-colors duration-150 border border-neutral-700 cursor-pointer font-medium"
+      >
+        Reset to Defaults
+      </button>
     </div>
   );
 }
