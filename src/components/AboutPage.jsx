@@ -79,22 +79,13 @@ export function AboutPage({ isOpen, onClose, isDark = true }) {
           </p>
         </section>
 
-        {/* Section 2: # inspiration */}
+        {/* Section 2: # mechanics & geometry */}
         <section className="mb-10 sm:mb-12">
           <h2 className="font-mono text-sm sm:text-base font-bold text-neutral-100 mb-3 flex items-center gap-1.5">
-            <span className="text-neutral-500 font-normal">#</span> inspiration
+            <span className="text-neutral-500 font-normal">#</span> mechanics & geometry
           </h2>
           <p className="font-mono text-xs sm:text-sm text-neutral-400 leading-relaxed font-normal">
-            a creative nod to{' '}
-            <a
-              href="https://signature.cnrad.dev/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-neutral-300 underline underline-offset-4 hover:text-white transition-colors"
-            >
-              cnrad&apos;s
-            </a>{' '}
-            digitized signatures, taken further with extra layouts, adjustable curve tension, replay animation, and svg export.
+            every key is registered as a normalized 2d coordinate on the active keyboard topology. sequential keystrokes are interpolated through parametric catmull-rom splines and cubic bézier curves with real-time tension modulation.
           </p>
         </section>
 
@@ -104,7 +95,7 @@ export function AboutPage({ isOpen, onClose, isDark = true }) {
             <span className="text-neutral-500 font-normal">#</span> how it works
           </h2>
           <p className="font-mono text-xs sm:text-sm text-neutral-400 leading-relaxed font-normal">
-            type your name into the center prompt. keyglyph traces the underlying centroid vectors across the switches in real time.
+            type your name into the center prompt. keyglyph traces the underlying centroid vectors across the switches in real time, supporting multi-layout projections, name stacking, lossless vector exports, and direct link sharing.
           </p>
         </section>
 
@@ -120,15 +111,7 @@ export function AboutPage({ isOpen, onClose, isDark = true }) {
             >
               carbon
             </a>{' '}
-            • in tacit concordance with{' '}
-            <a
-              href="https://cnrad.dev/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-neutral-300 underline underline-offset-4 hover:text-white transition-colors"
-            >
-              cnrad
-            </a>
+            <span className="text-neutral-600">(@carbonthecoder)</span>
           </div>
           <div>
             <a
