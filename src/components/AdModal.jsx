@@ -65,13 +65,13 @@ export function AdModal({
         </div>
 
         {/* Content - Simple Ads coming soon */}
-        <div className="py-3 flex flex-col items-center font-sans font-extrabold">
+        <div className="py-3 flex flex-col items-center font-mono">
           {!isCompleted ? (
             <>
-              <h3 className="font-extrabold text-sm tracking-tight mb-1 text-neutral-900 dark:text-neutral-100">
+              <h3 className="font-bold text-sm tracking-tight mb-1 text-neutral-900 dark:text-neutral-100">
                 Ads coming soon
               </h3>
-              <p className="text-xs text-neutral-500 mb-5">
+              <p className="text-xs text-neutral-500 mb-5 font-mono">
                 Unlocking {exportType} in {timeLeft}s
               </p>
 
@@ -84,14 +84,14 @@ export function AdModal({
               </div>
             </>
           ) : (
-            <div className="flex flex-col items-center py-2">
+            <div className="flex flex-col items-center py-2 font-mono">
               <div className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 flex items-center justify-center mb-2">
                 <Check className="w-4 h-4" />
               </div>
-              <h3 className="font-extrabold text-sm text-neutral-900 dark:text-neutral-100">
+              <h3 className="font-bold text-sm text-neutral-900 dark:text-neutral-100">
                 Unlocked
               </h3>
-              <p className="text-xs text-neutral-500 mt-1">
+              <p className="text-xs text-neutral-500 mt-1 font-mono">
                 Downloading {exportType}...
               </p>
             </div>

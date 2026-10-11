@@ -77,7 +77,7 @@ export function Keyboard({
                 type="button"
                 onClick={() => onKeyClick?.(char)}
                 style={{ touchAction: 'manipulation' }}
-                className={`w-7 h-9 xs:w-8 xs:h-10 sm:w-10 sm:h-12 md:w-12 md:h-13 rounded-lg sm:rounded-xl flex items-center justify-center font-sans font-extrabold text-[11px] xs:text-xs transition-all duration-100 cursor-pointer active:scale-90 ${
+                className={`w-7 h-9 xs:w-8 xs:h-10 sm:w-10 sm:h-12 md:w-12 md:h-13 rounded-lg sm:rounded-xl flex items-center justify-center font-mono font-bold text-[11px] xs:text-xs transition-all duration-100 cursor-pointer active:scale-90 ${
                   isLastPressed
                     ? isDark
                       ? 'bg-neutral-600 text-white border border-neutral-300 scale-95 shadow-md'
@@ -85,7 +85,7 @@ export function Keyboard({
                     : isInSignature
                     ? isDark
                       ? 'bg-neutral-900 text-white border border-neutral-700'
-                      : 'bg-neutral-200 text-black border border-neutral-400 font-extrabold shadow-sm'
+                      : 'bg-neutral-200 text-black border border-neutral-400 font-bold shadow-sm'
                     : isDark
                     ? 'bg-[#0c0c0e] text-neutral-400 border border-[#222226] hover:bg-[#141418] hover:text-neutral-200 hover:border-neutral-600'
                     : 'bg-[#f4f4f5] text-neutral-900 border border-neutral-300 hover:bg-neutral-200 hover:text-neutral-500 hover:border-neutral-400 shadow-[0_1px_2px_rgba(0,0,0,0.06)]'
