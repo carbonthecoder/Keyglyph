@@ -379,11 +379,7 @@ export default function App() {
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-3.5 py-1.5 rounded-full bg-neutral-900/95 text-white dark:bg-neutral-100/95 dark:text-black text-xs font-mono border border-neutral-700 dark:border-neutral-300 shadow-2xl backdrop-blur-md flex items-center gap-2">
-          {toastMessage.includes('✨') ? (
-            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse shrink-0" />
-          ) : (
-            <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-          )}
+          <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -579,8 +575,8 @@ export default function App() {
       {/* Footer */}
       <footer className="w-full mt-auto py-8 px-6 sm:px-12 select-none font-mono z-30">
         <div className="w-full border-t border-neutral-300 dark:border-neutral-800 mb-6" />
-        <div className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-neutral-500">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-left">
+        <div className="w-full flex flex-col items-start gap-2 text-xs text-neutral-500 max-w-2xl sm:pr-28">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-left">
             <div className="flex items-center gap-1.5 text-neutral-900 dark:text-neutral-300">
               <span>©</span>
               <span>crafted by</span>
@@ -592,20 +588,22 @@ export default function App() {
               >
                 carbon
               </a>
+              <span className="text-neutral-400 dark:text-neutral-600">(</span>
+              <a
+                href="https://github.com/carbonthecoder"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-300 transition-colors underline underline-offset-2"
+              >
+                @carbonthecoder
+              </a>
+              <span className="text-neutral-400 dark:text-neutral-600">)</span>
             </div>
             <span className="hidden sm:inline text-neutral-400 dark:text-neutral-700">•</span>
             <span className="text-[11px] text-neutral-500">
               All works ©. Do not reproduce without the expressed written consent of carbon.
             </span>
           </div>
-          <a
-            href="https://github.com/carbonthecoder"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs hover:text-neutral-900 dark:hover:text-neutral-300 transition-colors flex items-center gap-1.5"
-          >
-            <span>@carbonthecoder</span>
-          </a>
         </div>
       </footer>
 
