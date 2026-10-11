@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import confetti from 'canvas-confetti';
-import { Sliders, Download, Check, Copy, Play, Sparkles } from 'lucide-react';
+import { Sliders, Download, Check, Copy, Play } from 'lucide-react';
 import { Header } from './components/Header';
 import { Keyboard } from './components/Keyboard';
 import { SignatureOverlay } from './components/SignatureOverlay';
@@ -509,7 +509,7 @@ export default function App() {
 
         {/* Action Buttons: Only show when user has entered text */}
         {inputText && inputText.trim().length > 0 && (
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-2.5 z-30 font-mono transition-all duration-300 animate-in fade-in zoom-in-95">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-2.5 z-30 font-mono animate-ios-enter">
             <button
               onClick={handleReplay}
               className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
@@ -525,9 +525,11 @@ export default function App() {
 
             <button
               onClick={handleCopySVG}
-              className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-200 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer relative overflow-hidden ${
+              className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
                 isCopied
-                  ? 'bg-gradient-to-r from-violet-600 via-fuchsia-600 to-cyan-500 text-white shadow-[0_0_16px_rgba(168,85,247,0.55)] border border-transparent scale-102'
+                  ? isDark
+                    ? 'bg-neutral-800 text-white border border-neutral-700'
+                    : 'bg-neutral-200 text-black border border-neutral-300'
                   : isDark
                   ? 'bg-neutral-900 border border-neutral-800 text-neutral-200 hover:text-neutral-400 hover:bg-neutral-800'
                   : 'bg-neutral-100 border border-neutral-300 text-neutral-900 hover:text-neutral-500 hover:bg-neutral-200'
@@ -536,8 +538,8 @@ export default function App() {
             >
               {isCopied ? (
                 <>
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" />
-                  <span className="tracking-wide">Copied! ✨</span>
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Copied</span>
                 </>
               ) : (
                 <>
@@ -575,46 +577,35 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full py-8 px-4 text-center z-30 font-mono select-none">
-        <div className="max-w-xl mx-auto flex flex-col items-center gap-2">
-          <div className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 text-xs text-neutral-500 dark:text-neutral-400 font-mono">
-            <span>crafted by</span>
-            <a
-              href="https://ibrahim.is-cool.dev"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-bold underline underline-offset-4 text-neutral-900 dark:text-neutral-100 hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors"
-            >
-              carbon
-            </a>
-            <span className="hidden xs:inline text-neutral-300 dark:text-neutral-700">•</span>
-            <span className="inline-flex items-center gap-1.5">
-              <span>in tacit concordance with</span>
+      <footer className="w-full mt-auto py-8 px-6 sm:px-12 select-none font-mono z-30">
+        <div className="w-full border-t border-neutral-300 dark:border-neutral-800 mb-6" />
+        <div className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-neutral-500">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-left">
+            <div className="flex items-center gap-1.5 text-neutral-900 dark:text-neutral-300">
+              <span>©</span>
+              <span>crafted by</span>
               <a
-                href="https://cnrad.dev/"
+                href="https://ibrahim.is-cool.dev"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-bold underline underline-offset-4 text-neutral-800 dark:text-neutral-200 hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors"
+                className="font-bold underline underline-offset-4 text-neutral-900 dark:text-neutral-100 hover:text-neutral-400 transition-colors"
               >
-                cnrad
+                carbon
               </a>
+            </div>
+            <span className="hidden sm:inline text-neutral-400 dark:text-neutral-700">•</span>
+            <span className="text-[11px] text-neutral-500">
+              All works ©. Do not reproduce without the expressed written consent of carbon.
             </span>
-            <span className="hidden xs:inline text-neutral-300 dark:text-neutral-700">•</span>
-            <a
-              href="https://github.com/carbonthecoder"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 font-bold text-neutral-900 dark:text-neutral-100 hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors group"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="w-3.5 h-3.5 fill-current transition-transform duration-150 group-hover:scale-110"
-              >
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-              </svg>
-              <span className="underline underline-offset-4">@carbonthecoder</span>
-            </a>
           </div>
+          <a
+            href="https://github.com/carbonthecoder"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs hover:text-neutral-900 dark:hover:text-neutral-300 transition-colors flex items-center gap-1.5"
+          >
+            <span>@carbonthecoder</span>
+          </a>
         </div>
       </footer>
 

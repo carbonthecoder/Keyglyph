@@ -1,27 +1,40 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
 
 export function AboutPage({ isOpen, onClose, isDark = true }) {
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 260);
+  };
+
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      setIsClosing(false);
+      return;
+    }
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        onClose();
+        handleClose();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen && !isClosing) return null;
 
   return (
     <main
-      className={`fixed inset-0 z-50 overflow-y-auto font-mono selection:bg-neutral-800 selection:text-white transition-colors duration-150 ${
+      className={`fixed inset-0 z-50 overflow-y-auto font-mono selection:bg-neutral-800 selection:text-white ${
         isDark ? 'bg-black text-neutral-200' : 'bg-white text-neutral-900'
-      }`}
+      } ${isClosing ? 'animate-ios-page-exit' : 'animate-ios-page-enter'}`}
     >
       {/* Subpage Nav */}
       <nav
@@ -30,7 +43,7 @@ export function AboutPage({ isOpen, onClose, isDark = true }) {
         }`}
       >
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="font-mono text-xs text-neutral-400 hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -38,7 +51,7 @@ export function AboutPage({ isOpen, onClose, isDark = true }) {
         </button>
 
         <button
-          onClick={onClose}
+          onClick={handleClose}
           aria-label="Close"
           className="text-neutral-500 hover:text-neutral-300 text-xs font-mono transition-colors cursor-pointer"
         >

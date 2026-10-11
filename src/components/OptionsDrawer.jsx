@@ -24,7 +24,7 @@ export function OptionsDrawer({
 
   return (
     <div
-      className="flex flex-col items-start fixed sm:absolute bottom-6 sm:right-6 max-sm:-translate-x-1/2 max-sm:left-1/2 max-sm:w-[calc(100%-3rem)] sm:max-w-xs p-4 rounded-xl bg-neutral-950 border-neutral-800/50 border z-50 text-white shadow-2xl font-sans"
+      className="flex flex-col items-start fixed sm:absolute bottom-6 sm:right-6 max-sm:-translate-x-1/2 max-sm:left-1/2 max-sm:w-[calc(100%-3rem)] sm:max-w-xs p-4 rounded-xl bg-neutral-950 border-neutral-800/50 border z-50 text-white shadow-2xl font-sans animate-ios-drawer"
     >
       {/* Close button & Title */}
       <button

@@ -69,3 +69,64 @@
   background-size: 300% 300%;
   animation: shadeShift 4s ease infinite;
 }
+
+/* iOS-style smooth spring animations */
+@keyframes iosSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(22px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-ios-enter {
+  animation: iosSlideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes iosDrawerEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(32px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-ios-drawer {
+  animation: iosDrawerEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes iosPageEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes iosPageExit {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+.animate-ios-page-enter {
+  animation: iosPageEnter 0.44s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-ios-page-exit {
+  animation: iosPageExit 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
