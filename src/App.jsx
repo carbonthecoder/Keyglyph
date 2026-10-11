@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import confetti from 'canvas-confetti';
-import { Sliders, Download, Check, Copy, Play } from 'lucide-react';
+import { Sliders, Download, Check, Copy, Play, Share2, Video } from 'lucide-react';
 import { Header } from './components/Header';
 import { Keyboard } from './components/Keyboard';
 import { SignatureOverlay } from './components/SignatureOverlay';
@@ -8,7 +8,7 @@ import { OptionsDrawer } from './components/OptionsDrawer';
 import { AboutPage } from './components/AboutPage';
 import { AdModal } from './components/AdModal';
 import { soundEngine } from './utils/audio';
-import { downloadSVG, downloadPNG, copySVGToClipboard } from './utils/export';
+import { downloadSVG, downloadPNG, copySVGToClipboard, recordReplayVideo } from './utils/export';
 import { KEYBOARD_LAYOUTS } from './utils/layouts';
 import { CURVE_TYPES } from './utils/curves';
 
@@ -58,13 +58,65 @@ export default function App() {
     };
   }, []);
 
+  // Hydrate name from URL path (/yourname) on load & auto-replay
+  useEffect(() => {
+    const rawPath = window.location.pathname.replace(/^\/+|\/+$/g, '');
+    if (rawPath && rawPath !== 'about') {
+      try {
+        const decoded = decodeURIComponent(rawPath).replace(/[-_]/g, ' ');
+        if (decoded.trim()) {
+          setInputText(decoded.trim());
+          setTimeout(() => {
+            soundEngine.playKey();
+            setIsReplaying(true);
+            setReplayProgress(0.001);
+            const duration = 1800;
+            const startTime = performance.now();
+            const animate = (currentTime) => {
+              const elapsed = currentTime - startTime;
+              const progress = Math.min(1, elapsed / duration);
+              const eased = 1 - Math.pow(1 - progress, 3);
+              setReplayProgress(Math.min(1, Math.max(0, eased)));
+              if (progress < 1) {
+                replayAnimRef.current = requestAnimationFrame(animate);
+              } else {
+                setIsReplaying(false);
+                setReplayProgress(1);
+              }
+            };
+            replayAnimRef.current = requestAnimationFrame(animate);
+          }, 450);
+        }
+      } catch (e) {
+        // Malformed URI handling
+      }
+    }
+  }, []);
+
+  // Sync browser address bar with current typed name
+  useEffect(() => {
+    if (inputText && inputText.trim()) {
+      const slug = encodeURIComponent(inputText.trim().toLowerCase().replace(/\s+/g, '-'));
+      window.history.replaceState(null, '', `/${slug}`);
+    } else {
+      if (window.location.pathname !== '/' && window.location.pathname !== '') {
+        window.history.replaceState(null, '', '/');
+      }
+    }
+  }, [inputText]);
+
   // Replay animation state
   const [isReplaying, setIsReplaying] = useState(false);
   const [replayProgress, setReplayProgress] = useState(1);
   const replayAnimRef = useRef(null);
 
-  // AI Sparkle copy state
+  // Copy & Share states
   const [isCopied, setIsCopied] = useState(false);
+  const [isLinkCopied, setIsLinkCopied] = useState(false);
+  const [isRecordingVideo, setIsRecordingVideo] = useState(false);
+
+  // Name Stacking state (default false every time)
+  const [nameStacking, setNameStacking] = useState(false);
 
   // Ad modal state
   const [isAdOpen, setIsAdOpen] = useState(false);
@@ -152,6 +204,22 @@ export default function App() {
     }
     return points;
   }, [inputText, keyPositions]);
+
+  // Stacked multi-word points when name stacking is active
+  const stackedSignaturePoints = useMemo(() => {
+    if (!nameStacking || !inputText || Object.keys(keyPositions).length === 0) return null;
+    const words = inputText.trim().split(/\s+/).filter(Boolean);
+    if (words.length <= 1) return null;
+    return words.map((word) => {
+      const wordPoints = [];
+      for (let char of word.toUpperCase()) {
+        if (keyPositions[char]) {
+          wordPoints.push(keyPositions[char]);
+        }
+      }
+      return wordPoints;
+    });
+  }, [nameStacking, inputText, keyPositions]);
 
   // Physical keyboard listener
   useEffect(() => {
@@ -286,7 +354,7 @@ export default function App() {
     };
   }, []);
 
-  // 1-Click Copy SVG with AI Starlight Sparkles
+  // 1-Click Copy SVG
   const handleCopySVG = async () => {
     if (!inputText || signaturePoints.length < 2) {
       showToast('Type your name first');
@@ -295,54 +363,52 @@ export default function App() {
     if (svgRef.current) {
       const success = await copySVGToClipboard(svgRef.current, isDark);
       if (success) {
-        // Multi-stage AI starlight sparkle burst
-        const defaults = {
-          origin: { y: 0.82 },
-          colors: ['#38bdf8', '#a855f7', '#ec4899', '#fbbf24', '#ffffff', '#06b6d4'],
-          shapes: ['star'],
-          disableForReducedMotion: true,
-        };
-
-        confetti({
-          ...defaults,
-          particleCount: 28,
-          spread: 45,
-          startVelocity: 36,
-          scalar: 1.25,
-          ticks: 90,
-        });
-
-        setTimeout(() => {
-          confetti({
-            ...defaults,
-            particleCount: 22,
-            spread: 85,
-            startVelocity: 42,
-            shapes: ['circle', 'star'],
-            scalar: 0.85,
-            ticks: 110,
-          });
-        }, 110);
-
-        setTimeout(() => {
-          confetti({
-            ...defaults,
-            particleCount: 16,
-            spread: 125,
-            startVelocity: 30,
-            scalar: 0.65,
-            ticks: 130,
-          });
-        }, 220);
-
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 2000);
-        showToast('Vector SVG copied with AI sparkles ✨');
+        showToast('SVG copied to clipboard');
       } else {
         showToast('Failed to copy SVG');
       }
     }
   };
+
+  // 1-Click Copy direct share link
+  const handleShareLink = useCallback(async () => {
+    if (!inputText || !inputText.trim()) {
+      showToast('Type your name first');
+      return;
+    }
+    const slug = encodeURIComponent(inputText.trim().toLowerCase().replace(/\s+/g, '-'));
+    const shareUrl = `${window.location.origin}/${slug}`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setIsLinkCopied(true);
+      showToast('Share link copied');
+      setTimeout(() => setIsLinkCopied(false), 2000);
+    } catch (err) {
+      showToast('Could not copy link');
+    }
+  }, [inputText, showToast]);
+
+  // Export 60fps video replay
+  const handleExportVideo = useCallback(async () => {
+    if (!svgRef.current || isRecordingVideo) return;
+    if (!inputText || signaturePoints.length < 2) {
+      showToast('Type your name first');
+      return;
+    }
+    setIsRecordingVideo(true);
+    showToast('Recording 60fps video...');
+    try {
+      const slug = inputText.trim() ? inputText.trim().toLowerCase().replace(/\s+/g, '-') : 'keyglyph';
+      await recordReplayVideo(svgRef.current, `${slug}-replay.webm`, isDark);
+      showToast('Video downloaded');
+    } catch (err) {
+      showToast('Video export failed');
+    } finally {
+      setIsRecordingVideo(false);
+    }
+  }, [inputText, isDark, isRecordingVideo, signaturePoints.length, showToast]);
 
   const handleStartExport = (type) => {
     if (!inputText) {
@@ -490,6 +556,7 @@ export default function App() {
           <SignatureOverlay
             svgRef={svgRef}
             points={signaturePoints}
+            stackedPoints={stackedSignaturePoints}
             curveType={options.curveType}
             styleMode={options.styleMode}
             color={options.color}
@@ -502,6 +569,27 @@ export default function App() {
             isDark={isDark}
           />
         </div>
+
+        {/* Minimal Name Stacking status below keyboard: pure monospace, no bulky button */}
+        {inputText && (
+          <div className="mt-3 text-center select-none font-mono text-[11px] text-neutral-500">
+            <span>name stacking: </span>
+            <button
+              onClick={() => {
+                const next = !nameStacking;
+                setNameStacking(next);
+                showToast(next ? 'Name stacking enabled' : 'Name stacking disabled');
+              }}
+              className={`cursor-pointer underline underline-offset-4 transition-colors ${
+                nameStacking
+                  ? 'text-neutral-100 font-bold'
+                  : 'text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              {nameStacking ? 'enabled' : 'disabled'}
+            </button>
+          </div>
+        )}
 
         {/* Action Buttons: Only show when user has entered text */}
         {inputText && inputText.trim().length > 0 && (
@@ -517,6 +605,32 @@ export default function App() {
             >
               <Play className={`w-3.5 h-3.5 ${isReplaying ? 'animate-pulse text-amber-500' : ''}`} />
               <span>{isReplaying ? 'Replaying...' : 'Replay'}</span>
+            </button>
+
+            <button
+              onClick={handleShareLink}
+              className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
+                isLinkCopied
+                  ? isDark
+                    ? 'bg-neutral-800 text-white border border-neutral-700'
+                    : 'bg-neutral-200 text-black border border-neutral-300'
+                  : isDark
+                  ? 'bg-neutral-900 border border-neutral-800 text-neutral-200 hover:text-neutral-400 hover:bg-neutral-800'
+                  : 'bg-neutral-100 border border-neutral-300 text-neutral-900 hover:text-neutral-500 hover:bg-neutral-200'
+              }`}
+              title="Copy direct share link (keyglyph.vercel.app/name)"
+            >
+              {isLinkCopied ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Link Copied</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>Share</span>
+                </>
+              )}
             </button>
 
             <button
@@ -543,6 +657,22 @@ export default function App() {
                   <span>Copy SVG</span>
                 </>
               )}
+            </button>
+
+            <button
+              onClick={handleExportVideo}
+              disabled={isRecordingVideo}
+              className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
+                isRecordingVideo ? 'opacity-60 cursor-not-allowed' : ''
+              } ${
+                isDark
+                  ? 'bg-neutral-900 border border-neutral-800 text-neutral-200 hover:text-neutral-400 hover:bg-neutral-800'
+                  : 'bg-neutral-100 border border-neutral-300 text-neutral-900 hover:text-neutral-500 hover:bg-neutral-200'
+              }`}
+              title="Export high-definition 60fps replay video for X & LinkedIn"
+            >
+              <Video className={`w-3.5 h-3.5 ${isRecordingVideo ? 'animate-pulse text-amber-500' : ''}`} />
+              <span>{isRecordingVideo ? 'Recording...' : 'Export Video'}</span>
             </button>
 
             <button

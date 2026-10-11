@@ -131,3 +131,116 @@ export function downloadPNG(svgElement, filename = 'keyglyph-signature.png', sca
   };
   image.src = blobURL;
 }
+
+export async function recordReplayVideo(
+  svgElement,
+  filename = 'keyglyph-replay.webm',
+  isDark = true,
+  durationMs = 2200
+) {
+  if (!svgElement) return;
+
+  const rect = svgElement.getBoundingClientRect();
+  const width = Math.max(rect.width || 800, 300) * 1.5;
+  const height = Math.max(rect.height || 450, 200) * 1.5;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const clone = svgElement.cloneNode(true);
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  clone.setAttribute('width', width);
+  clone.setAttribute('height', height);
+  clone.setAttribute('viewBox', `0 0 ${width / 1.5} ${height / 1.5}`);
+
+  const paths = clone.querySelectorAll('path');
+  const pathData = Array.from(paths).map((p) => {
+    let len = 1000;
+    try {
+      len = p.getTotalLength() || 1000;
+    } catch (e) {}
+    return { element: p, length: len };
+  });
+
+  const stream = canvas.captureStream(60);
+  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+    ? 'video/webm;codecs=vp9'
+    : MediaRecorder.isTypeSupported('video/webm')
+    ? 'video/webm'
+    : 'video/mp4';
+
+  const mediaRecorder = new MediaRecorder(stream, {
+    mimeType,
+    videoBitsPerSecond: 4000000,
+  });
+
+  const chunks = [];
+  mediaRecorder.ondataavailable = (e) => {
+    if (e.data.size > 0) chunks.push(e.data);
+  };
+
+  const recordingPromise = new Promise((resolve) => {
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(chunks, { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      resolve();
+    };
+  });
+
+  mediaRecorder.start();
+
+  const startTime = performance.now();
+  const URLObj = window.URL || window.webkitURL || window;
+
+  const renderFrame = async () => {
+    const elapsed = performance.now() - startTime;
+    const progress = Math.min(1, elapsed / durationMs);
+
+    pathData.forEach(({ element, length }) => {
+      const offset = length * (1 - progress);
+      element.setAttribute('stroke-dasharray', length);
+      element.setAttribute('stroke-dashoffset', offset);
+    });
+
+    const svgString = new XMLSerializer().serializeToString(clone);
+    const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+    const imgUrl = URLObj.createObjectURL(svgBlob);
+
+    await new Promise((res) => {
+      const img = new Image();
+      img.onload = () => {
+        ctx.fillStyle = isDark ? '#000000' : '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        URLObj.revokeObjectURL(imgUrl);
+        res();
+      };
+      img.onerror = () => {
+        URLObj.revokeObjectURL(imgUrl);
+        res();
+      };
+      img.src = imgUrl;
+    });
+
+    if (progress < 1) {
+      requestAnimationFrame(renderFrame);
+    } else {
+      setTimeout(() => {
+        mediaRecorder.stop();
+      }, 500);
+    }
+  };
+
+  requestAnimationFrame(renderFrame);
+  return recordingPromise;
+}

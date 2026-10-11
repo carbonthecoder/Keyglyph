@@ -4,6 +4,7 @@ import { generateSvgPath } from '../utils/curves';
 export function SignatureOverlay({
   svgRef,
   points = [],
+  stackedPoints = null, // optional array of point arrays: [[...word1], [...word2]]
   curveType = 'linear',
   styleMode = 'solid', // 'solid' | 'gradient' | 'glow'
   color = '#ffffff',
@@ -19,9 +20,28 @@ export function SignatureOverlay({
   const pathElRef = useRef(null);
   const [measuredLength, setMeasuredLength] = useState(1000);
 
-  const pathD = useMemo(() => {
-    return generateSvgPath(points, curveType, tension);
-  }, [points, curveType, tension]);
+  // Compute paths for either single continuous line or stacked separate word lines
+  const pathsData = useMemo(() => {
+    if (stackedPoints && stackedPoints.length > 1) {
+      return stackedPoints
+        .filter((wPts) => wPts.length >= 2)
+        .map((wPts, i) => ({
+          d: generateSvgPath(wPts, curveType, tension),
+          points: wPts,
+          index: i,
+        }));
+    }
+    if (points && points.length >= 2) {
+      return [{
+        d: generateSvgPath(points, curveType, tension),
+        points: points,
+        index: 0,
+      }];
+    }
+    return [];
+  }, [points, stackedPoints, curveType, tension]);
+
+  const pathD = pathsData.length > 0 ? pathsData[0].d : '';
 
   // Measure path length dynamically whenever path updates
   useEffect(() => {
@@ -67,7 +87,7 @@ export function SignatureOverlay({
 
   const activeGradient = gradients[gradientPreset] || gradients.cyberpunk;
 
-  if (points.length < 2) {
+  if (pathsData.length === 0) {
     return null;
   }
 
@@ -94,14 +114,16 @@ export function SignatureOverlay({
         </filter>
       </defs>
 
-      {/* Render Main Path */}
-      {pathD && (
+      {/* Render Path(s) */}
+      {pathsData.map((pObj, idx) => (
         <path
-          ref={pathElRef}
-          d={pathD}
+          key={idx}
+          ref={idx === 0 ? pathElRef : undefined}
+          d={pObj.d}
           fill="none"
           stroke={strokeColor}
-          strokeWidth={strokeWidth}
+          strokeWidth={idx === 0 ? strokeWidth : Math.max(1.5, strokeWidth * 0.88)}
+          opacity={idx === 0 ? 1 : 0.82}
           strokeLinecap="round"
           strokeLinejoin="round"
           filter={styleMode === 'glow' ? 'url(#signature-glow)' : undefined}
@@ -115,7 +137,7 @@ export function SignatureOverlay({
               : undefined
           }
         />
-      )}
+      ))}
 
       {/* Render Dots at Key Vertices */}
       {showDots &&
