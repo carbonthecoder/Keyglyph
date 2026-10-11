@@ -4,7 +4,7 @@ import { generateSvgPath } from '../utils/curves';
 export function SignatureOverlay({
   svgRef,
   points = [],
-  curveType = 'cubic bezier',
+  curveType = 'linear',
   styleMode = 'solid', // 'solid' | 'gradient' | 'glow'
   color = '#ffffff',
   gradientPreset = 'sunset',

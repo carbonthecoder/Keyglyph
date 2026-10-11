@@ -13,7 +13,7 @@ import { CURVE_TYPES } from './utils/curves';
 
 const DEFAULT_OPTIONS = {
   layout: 'qwerty',
-  curveType: 'cubic bezier',
+  curveType: 'linear',
   showNumbers: false,
   styleMode: 'solid',
   color: '#ffffff',
@@ -361,37 +361,51 @@ export default function App() {
 
       {/* Workspace */}
       <main className="flex-1 w-full max-w-4xl flex flex-col items-center justify-center px-4 py-8 relative">
-        {/* Name Input with Underline */}
+        {/* Name Input with Dynamic Sizing & Cool Changing Shades Underline */}
         <div className="mb-10 sm:mb-14 text-center cursor-text relative w-full flex flex-col items-center">
-          <div className="relative inline-block max-w-xl w-full px-4">
+          <div className="relative inline-block max-w-3xl w-full px-4 sm:px-8">
             <input
               ref={textInputRef}
               type="text"
               value={inputText}
               onChange={(e) => {
-                const val = e.target.value.slice(0, 35);
+                const val = e.target.value.slice(0, 50);
                 setInputText(val);
                 soundEngine.playKey();
                 resetInactivityTimer();
+                // Ensure latest typed letter automatically scrolls into view side-to-side
+                requestAnimationFrame(() => {
+                  if (textInputRef.current) {
+                    textInputRef.current.scrollLeft = textInputRef.current.scrollWidth;
+                  }
+                });
               }}
               placeholder="Enter your name"
               autoFocus
-              className={`w-full text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-syne font-extrabold tracking-tight text-center bg-transparent border-none outline-none transition-colors pb-2 placeholder:text-neutral-400 dark:placeholder:text-neutral-700 ${
-                isDark ? 'text-white' : 'text-black'
-              }`}
+              className={`w-full overflow-x-auto whitespace-nowrap tracking-tight text-center bg-transparent border-none outline-none transition-all duration-150 pb-2 placeholder:text-neutral-400 dark:placeholder:text-neutral-700 font-syne font-extrabold ${
+                inputText.length > 20
+                  ? 'text-xl sm:text-2xl md:text-3xl'
+                  : inputText.length > 12
+                  ? 'text-2xl sm:text-3xl md:text-4xl'
+                  : 'text-2xl xs:text-3xl sm:text-4xl md:text-5xl'
+              } ${isDark ? 'text-white' : 'text-black'}`}
             />
-            {/* Ambient Underline */}
+            {/* Ambient Underline with Cool Changing Shades */}
             <div className="w-full flex justify-center mt-1">
               <div
-                className={`h-[2px] transition-all duration-300 rounded-full ${
+                className={`h-[2.5px] transition-all duration-500 rounded-full ${
                   inputText
-                    ? isDark
-                      ? 'w-3/4 max-w-md bg-gradient-to-r from-transparent via-cyan-400 via-fuchsia-400 to-transparent shadow-[0_0_12px_rgba(56,189,248,0.7)]'
-                      : 'w-3/4 max-w-md bg-gradient-to-r from-transparent via-violet-600 via-fuchsia-600 to-transparent shadow-[0_0_8px_rgba(124,58,237,0.35)]'
-                    : isDark
-                    ? 'w-44 sm:w-56 bg-gradient-to-r from-transparent via-neutral-600 to-transparent opacity-70'
-                    : 'w-44 sm:w-56 bg-gradient-to-r from-transparent via-neutral-300 to-transparent opacity-80'
+                    ? 'w-full max-w-md animate-shade-shift shadow-[0_0_14px_rgba(168,85,247,0.65)]'
+                    : 'w-44 sm:w-56 bg-gradient-to-r from-transparent via-neutral-600 to-transparent opacity-60'
                 }`}
+                style={
+                  inputText
+                    ? {
+                        background:
+                          'linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6, #fbbf24, #34d399, #38bdf8)',
+                      }
+                    : undefined
+                }
               />
             </div>
           </div>
@@ -400,8 +414,8 @@ export default function App() {
         {/* Keyboard & Vector Signature Canvas */}
         <div 
           className="relative inline-block mx-auto max-w-full"
-          onMouseEnter={() => setIsKeyboardVisible(true)}
-          onClick={() => setIsKeyboardVisible(true)}
+          onMouseEnter={() => { if (!isReplaying) setIsKeyboardVisible(true); }}
+          onClick={() => { if (!isReplaying) setIsKeyboardVisible(true); }}
         >
           <Keyboard
             layout={options.layout}
@@ -411,8 +425,8 @@ export default function App() {
             onKeyClick={handleVirtualKeyClick}
             onKeyPositionsUpdate={setKeyPositions}
             isDark={isDark}
-            isVisible={isKeyboardVisible}
-            onHover={() => setIsKeyboardVisible(true)}
+            isVisible={isKeyboardVisible && !isReplaying}
+            onHover={() => { if (!isReplaying) setIsKeyboardVisible(true); }}
           />
 
           <SignatureOverlay
@@ -496,14 +510,11 @@ export default function App() {
         )}
       </main>
 
-      {/* High-Energy Solid Footer with Covert Vanguard Lineage */}
+      {/* Footer */}
       <footer className="w-full py-8 px-4 text-center z-30 font-mono select-none">
-        <div className="max-w-2xl mx-auto flex flex-col items-center gap-2.5">
-          <p className="text-xs sm:text-[13px] tracking-wide text-neutral-800 dark:text-neutral-200 font-bold leading-relaxed">
-            Pure kinetic euphoria — transmuting everyday keystrokes into sheer vector brilliance.
-          </p>
+        <div className="max-w-xl mx-auto flex flex-col items-center gap-2">
           <div className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 text-xs text-neutral-500 dark:text-neutral-400 font-mono">
-            <span>engineered with relentless vigor by</span>
+            <span>crafted by</span>
             <a
               href="https://ibrahim.is-cool.dev"
               target="_blank"
@@ -513,16 +524,15 @@ export default function App() {
               ibrahim
             </a>
             <span className="hidden xs:inline text-neutral-300 dark:text-neutral-700">•</span>
-            <span className="inline-flex items-center gap-1">
-              <span>in tacit</span>
+            <span className="inline-flex items-center gap-1.5">
+              <span>in tacit concordance with</span>
               <a
                 href="https://cnrad.dev/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-bold underline underline-offset-4 decoration-dotted text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white transition-colors"
-                title="Aesthetic provenance"
+                className="font-bold underline underline-offset-4 text-neutral-800 dark:text-neutral-200 hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors"
               >
-                concordance
+                cnrad
               </a>
             </span>
             <span className="hidden xs:inline text-neutral-300 dark:text-neutral-700">•</span>
