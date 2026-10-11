@@ -115,6 +115,7 @@ export default function App() {
   const [isLinkCopied, setIsLinkCopied] = useState(false);
   const [isRecordingVideo, setIsRecordingVideo] = useState(false);
   const [selectedVideoFormat, setSelectedVideoFormat] = useState('mp4');
+  const [selectedImageFormat, setSelectedImageFormat] = useState('svg');
 
   // Name Stacking state (default false every time)
   const [nameStacking, setNameStacking] = useState(false);
@@ -686,29 +687,53 @@ export default function App() {
               </div>
             </div>
 
-            <button
-              onClick={() => handleStartExport('SVG')}
-              className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
-                isDark
-                  ? 'bg-white text-black hover:text-neutral-600 hover:bg-neutral-200'
-                  : 'bg-black text-white hover:text-neutral-400 hover:bg-neutral-800'
-              }`}
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export SVG</span>
-            </button>
-
-            <button
-              onClick={() => handleStartExport('PNG')}
-              className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
-                isDark
-                  ? 'bg-white text-black hover:text-neutral-600 hover:bg-neutral-200'
-                  : 'bg-black text-white hover:text-neutral-400 hover:bg-neutral-800'
-              }`}
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export PNG</span>
-            </button>
+            <div className={`inline-flex items-center rounded-lg border shadow-sm font-mono text-xs ${
+              isDark ? 'border-neutral-800 bg-white text-black' : 'border-neutral-800 bg-black text-white'
+            }`}>
+              <button
+                onClick={() => handleStartExport(selectedImageFormat.toUpperCase())}
+                className={`h-8 px-3 text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer rounded-l-lg ${
+                  isDark
+                    ? 'hover:bg-neutral-200 text-black'
+                    : 'hover:bg-neutral-800 text-white'
+                }`}
+                title={`Export image as .${selectedImageFormat}`}
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Export Image</span>
+              </button>
+              <div className={`h-4 w-px ${isDark ? 'bg-neutral-300' : 'bg-neutral-700'}`} />
+              <div className="flex items-center gap-0.5 px-1.5">
+                <button
+                  onClick={() => setSelectedImageFormat('svg')}
+                  className={`px-1.5 py-0.5 text-[10px] rounded cursor-pointer transition-colors ${
+                    selectedImageFormat === 'svg'
+                      ? isDark
+                        ? 'bg-neutral-300 text-black font-bold'
+                        : 'bg-neutral-800 text-white font-bold'
+                      : isDark
+                      ? 'text-neutral-600 hover:text-black'
+                      : 'text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  svg
+                </button>
+                <button
+                  onClick={() => setSelectedImageFormat('png')}
+                  className={`px-1.5 py-0.5 text-[10px] rounded cursor-pointer transition-colors ${
+                    selectedImageFormat === 'png'
+                      ? isDark
+                        ? 'bg-neutral-300 text-black font-bold'
+                        : 'bg-neutral-800 text-white font-bold'
+                      : isDark
+                      ? 'text-neutral-600 hover:text-black'
+                      : 'text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  png
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </main>
