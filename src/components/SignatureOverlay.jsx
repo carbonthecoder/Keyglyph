@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { generateSvgPath } from '../utils/curves';
 
 export function SignatureOverlay({
   svgRef,
   points = [],
-  curveType = 'linear',
+  curveType = 'cubic bezier',
   styleMode = 'solid', // 'solid' | 'gradient' | 'glow'
   color = '#ffffff',
   gradientPreset = 'sunset',
@@ -14,9 +14,37 @@ export function SignatureOverlay({
   replayProgress = 1, // 0 to 1
   isDark = true,
 }) {
+  const pathElRef = useRef(null);
+  const [measuredLength, setMeasuredLength] = useState(1000);
+
   const pathD = useMemo(() => {
     return generateSvgPath(points, curveType, tension);
   }, [points, curveType, tension]);
+
+  // Measure path length dynamically whenever path updates
+  useEffect(() => {
+    if (pathElRef.current) {
+      try {
+        const len = pathElRef.current.getTotalLength();
+        if (len > 0) {
+          setMeasuredLength(Math.ceil(len));
+        }
+      } catch (e) {
+        // Fallback
+      }
+    }
+  }, [pathD]);
+
+  // Compute accurate total length with geometric fallback
+  const totalLength = useMemo(() => {
+    if (measuredLength > 10) return measuredLength;
+    if (!points || points.length < 2) return 1000;
+    let dist = 0;
+    for (let i = 0; i < points.length - 1; i++) {
+      dist += Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y);
+    }
+    return Math.max(600, Math.ceil(dist * 1.5));
+  }, [measuredLength, points]);
 
   // Color & Gradient definitions
   const strokeColor = useMemo(() => {
@@ -67,6 +95,7 @@ export function SignatureOverlay({
       {/* Render Main Path */}
       {pathD && (
         <path
+          ref={pathElRef}
           d={pathD}
           fill="none"
           stroke={strokeColor}
@@ -77,9 +106,9 @@ export function SignatureOverlay({
           style={
             replayProgress < 1
               ? {
-                  pathLength: 1,
-                  strokeDasharray: 1,
-                  strokeDashoffset: 1 - replayProgress,
+                  strokeDasharray: totalLength,
+                  strokeDashoffset: Math.max(0, (1 - replayProgress) * totalLength),
+                  transition: 'none',
                 }
               : undefined
           }
@@ -88,18 +117,20 @@ export function SignatureOverlay({
 
       {/* Render Dots at Key Vertices */}
       {showDots &&
-        points.map((pt, idx) => (
-          <circle
-            key={idx}
-            cx={pt.x}
-            cy={pt.y}
-            r={Math.max(2, strokeWidth * 0.9)}
-            fill={styleMode === 'gradient' ? activeGradient[0] : color}
-            stroke={isDark ? '#000' : '#fff'}
-            strokeWidth={1}
-            opacity={0.9}
-          />
-        ))}
+        points
+          .slice(0, replayProgress < 1 ? Math.max(1, Math.ceil(points.length * replayProgress)) : points.length)
+          .map((pt, idx) => (
+            <circle
+              key={idx}
+              cx={pt.x}
+              cy={pt.y}
+              r={Math.max(2, strokeWidth * 0.9)}
+              fill={styleMode === 'gradient' ? activeGradient[0] : color}
+              stroke={isDark ? '#000' : '#fff'}
+              strokeWidth={1}
+              opacity={0.9}
+            />
+          ))}
     </svg>
   );
 }

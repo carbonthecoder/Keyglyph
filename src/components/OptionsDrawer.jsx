@@ -175,10 +175,17 @@ export function OptionsDrawer({
           </div>
           <input
             type="range"
-            min="15"
-            max="60"
+            min="10"
+            max="75"
+            step="1"
             value={Math.round((options.tension ?? 0.35) * 100)}
-            onChange={(e) => onChange('tension', parseInt(e.target.value, 10) / 100)}
+            onChange={(e) => {
+              const val = parseInt(e.target.value, 10) / 100;
+              onChange('tension', val);
+              if (options.curveType === 'linear') {
+                onChange('curveType', 'cubic bezier');
+              }
+            }}
             className="w-full h-1 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-black dark:accent-white"
           />
         </div>

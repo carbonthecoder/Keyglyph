@@ -23,12 +23,13 @@ function getLinearPath(points) {
 }
 
 /**
- * Simple curve: lines with rounded corners
+ * Simple curve: lines with rounded corners scaled by tension
  */
-function getSimpleCurvePath(points, cornerRadius = 24) {
+function getSimpleCurvePath(points, tension = 0.35) {
   if (!points || points.length === 0) return '';
   if (points.length < 3) return getLinearPath(points);
 
+  const cornerRadius = Math.max(4, Math.round((tension ?? 0.35) * 85));
   let path = `M ${points[0].x} ${points[0].y}`;
 
   for (let i = 1; i < points.length - 1; i++) {
@@ -67,26 +68,25 @@ function getSimpleCurvePath(points, cornerRadius = 24) {
 }
 
 /**
- * Quadratic Bezier path: connects points through midpoints
+ * Quadratic Bezier path: connects points through midpoints scaled by tension
  */
-function getQuadraticBezierPath(points) {
+function getQuadraticBezierPath(points, tension = 0.35) {
   if (!points || points.length === 0) return '';
   if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
   if (points.length === 2) return `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}`;
 
   let path = `M ${points[0].x} ${points[0].y}`;
+  const factor = Math.max(0.1, Math.min(1.0, (tension ?? 0.35) * 1.8));
 
   for (let i = 0; i < points.length - 1; i++) {
     const curr = points[i];
     const next = points[i + 1];
     const midX = (curr.x + next.x) / 2;
     const midY = (curr.y + next.y) / 2;
+    const ctrlX = curr.x + (midX - curr.x) * factor;
+    const ctrlY = curr.y + (midY - curr.y) * factor;
 
-    if (i === 0) {
-      path += ` Q ${curr.x} ${curr.y} ${midX} ${midY}`;
-    } else {
-      path += ` Q ${curr.x} ${curr.y} ${midX} ${midY}`;
-    }
+    path += ` Q ${ctrlX.toFixed(2)} ${ctrlY.toFixed(2)} ${midX.toFixed(2)} ${midY.toFixed(2)}`;
   }
 
   const last = points[points.length - 1];
@@ -97,12 +97,12 @@ function getQuadraticBezierPath(points) {
 /**
  * Cubic Bezier path (Flowing calligraphic loops with smooth tangent weighting)
  */
-function getCubicBezierPath(points, tension = 0.30) {
+function getCubicBezierPath(points, tension = 0.35) {
   if (!points || points.length === 0) return '';
   if (points.length < 3) return getLinearPath(points);
 
   let path = `M ${points[0].x} ${points[0].y}`;
-  const t = Math.max(0.1, Math.min(0.6, tension));
+  const t = Math.max(0.06, Math.min(0.80, tension ?? 0.35));
 
   for (let i = 0; i < points.length - 1; i++) {
     const p0 = points[Math.max(0, i - 1)];
@@ -110,7 +110,7 @@ function getCubicBezierPath(points, tension = 0.30) {
     const p2 = points[i + 1];
     const p3 = points[Math.min(points.length - 1, i + 2)];
 
-    // Tangent smoothing scaled by tension parameter
+    // Tangent smoothing scaled directly by tension parameter
     const cp1x = p1.x + (p2.x - p0.x) * t;
     const cp1y = p1.y + (p2.y - p0.y) * t;
     const cp2x = p2.x - (p3.x - p1.x) * t;
@@ -123,16 +123,15 @@ function getCubicBezierPath(points, tension = 0.30) {
 }
 
 /**
- * Centripetal Catmull-Rom Spline path (alpha = 0.5)
- * Dynamically scales tension based on Euclidean chord distance between keys,
- * ensuring taut, precise signature strokes without overshooting or cusps.
+ * Centripetal Catmull-Rom Spline path
+ * Dynamically scales tension based on Euclidean chord distance between keys
  */
-function getCatmullRomPath(points, tension = 0.5) {
+function getCatmullRomPath(points, tension = 0.35) {
   if (!points || points.length === 0) return '';
   if (points.length < 3) return getLinearPath(points);
 
   let path = `M ${points[0].x} ${points[0].y}`;
-  const scale = Math.max(0.2, Math.min(1.2, tension / 0.5));
+  const factor = Math.max(0.08, Math.min(0.85, tension ?? 0.35));
 
   for (let i = 0; i < points.length - 1; i++) {
     const p0 = i > 0 ? points[i - 1] : points[i];
@@ -140,19 +139,19 @@ function getCatmullRomPath(points, tension = 0.5) {
     const p2 = points[i + 1];
     const p3 = i < points.length - 2 ? points[i + 2] : p2;
 
-    const d01 = Math.pow(Math.hypot(p1.x - p0.x, p1.y - p0.y), 0.5) || 0.0001;
-    const d12 = Math.pow(Math.hypot(p2.x - p1.x, p2.y - p1.y), 0.5) || 0.0001;
-    const d23 = Math.pow(Math.hypot(p3.x - p2.x, p3.y - p2.y), 0.5) || 0.0001;
+    const d01 = Math.pow(Math.hypot(p1.x - p0.x, p1.y - p0.y), 0.5) || 1;
+    const d12 = Math.pow(Math.hypot(p2.x - p1.x, p2.y - p1.y), 0.5) || 1;
+    const d23 = Math.pow(Math.hypot(p3.x - p2.x, p3.y - p2.y), 0.5) || 1;
 
-    const m1x = ((p1.x - p0.x) / d01 + (p2.x - p1.x) / d12) * 0.5;
-    const m1y = ((p1.y - p0.y) / d01 + (p2.y - p1.y) / d12) * 0.5;
-    const m2x = ((p2.x - p1.x) / d12 + (p3.x - p2.x) / d23) * 0.5;
-    const m2y = ((p2.y - p1.y) / d12 + (p3.y - p2.y) / d23) * 0.5;
+    const m1x = ((p1.x - p0.x) / d01 + (p2.x - p1.x) / d12) * factor;
+    const m1y = ((p1.y - p0.y) / d01 + (p2.y - p1.y) / d12) * factor;
+    const m2x = ((p2.x - p1.x) / d12 + (p3.x - p2.x) / d23) * factor;
+    const m2y = ((p2.y - p1.y) / d12 + (p3.y - p2.y) / d23) * factor;
 
-    const cp1x = p1.x + (m1x * d12 * scale) / 3;
-    const cp1y = p1.y + (m1y * d12 * scale) / 3;
-    const cp2x = p2.x - (m2x * d12 * scale) / 3;
-    const cp2y = p2.y - (m2y * d12 * scale) / 3;
+    const cp1x = p1.x + m1x * d12;
+    const cp1y = p1.y + m1y * d12;
+    const cp2x = p2.x - m2x * d12;
+    const cp2y = p2.y - m2y * d12;
 
     path += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2.x} ${p2.y}`;
   }
@@ -163,14 +162,14 @@ function getCatmullRomPath(points, tension = 0.5) {
 /**
  * Master dispatcher for SVG path generation based on selected curve style
  */
-export function generateSvgPath(points, curveType = 'linear', tension = 0.35) {
+export function generateSvgPath(points, curveType = 'cubic bezier', tension = 0.35) {
   if (!points || points.length === 0) return '';
   
   switch (curveType) {
     case 'simple curve':
-      return getSimpleCurvePath(points);
+      return getSimpleCurvePath(points, tension);
     case 'quadratic bezier':
-      return getQuadraticBezierPath(points);
+      return getQuadraticBezierPath(points, tension);
     case 'cubic bezier':
       return getCubicBezierPath(points, tension);
     case 'catmull rom':

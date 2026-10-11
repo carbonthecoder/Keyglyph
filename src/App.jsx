@@ -13,7 +13,7 @@ import { CURVE_TYPES } from './utils/curves';
 
 const DEFAULT_OPTIONS = {
   layout: 'qwerty',
-  curveType: 'linear',
+  curveType: 'cubic bezier',
   showNumbers: false,
   styleMode: 'solid',
   color: '#ffffff',
@@ -195,18 +195,25 @@ export default function App() {
 
   // Replay stroke animation
   const handleReplay = useCallback(() => {
-    if (signaturePoints.length < 2 || isReplaying) return;
+    if (!inputText || signaturePoints.length < 2) {
+      showToast('Type your name first');
+      return;
+    }
+    if (replayAnimRef.current) {
+      cancelAnimationFrame(replayAnimRef.current);
+    }
+    soundEngine.playKey();
     setIsReplaying(true);
-    setReplayProgress(0);
+    setReplayProgress(0.001);
     const startTime = performance.now();
-    const duration = Math.min(2200, Math.max(900, signaturePoints.length * 150));
+    const duration = Math.min(2600, Math.max(1000, signaturePoints.length * 170));
 
     const animate = (currentTime) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(1, elapsed / duration);
-      // easeOutCubic curve for realistic pen flourish
+      // easeOutCubic curve for smooth pen stroke
       const eased = 1 - Math.pow(1 - progress, 3);
-      setReplayProgress(eased);
+      setReplayProgress(Math.min(1, Math.max(0, eased)));
 
       if (progress < 1) {
         replayAnimRef.current = requestAnimationFrame(animate);
@@ -217,7 +224,7 @@ export default function App() {
     };
 
     replayAnimRef.current = requestAnimationFrame(animate);
-  }, [signaturePoints.length, isReplaying]);
+  }, [inputText, signaturePoints.length, showToast]);
 
   // Reset replay animation when user types new characters
   useEffect(() => {
@@ -362,16 +369,15 @@ export default function App() {
         <div className="mt-10 flex flex-wrap items-center justify-center gap-2.5 z-30 font-mono">
           <button
             onClick={handleReplay}
-            disabled={isReplaying || signaturePoints.length < 2}
-            className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+            className={`h-8 px-3.5 text-xs font-mono font-bold rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
               isDark
                 ? 'bg-neutral-900 border border-neutral-800 text-neutral-200 hover:text-neutral-400 hover:bg-neutral-800'
                 : 'bg-neutral-100 border border-neutral-300 text-neutral-900 hover:text-neutral-500 hover:bg-neutral-200'
             }`}
             title="Replay stroke drawing animation"
           >
-            <Play className={`w-3.5 h-3.5 ${isReplaying ? 'animate-pulse' : ''}`} />
-            <span>{isReplaying ? 'Playing...' : 'Replay'}</span>
+            <Play className={`w-3.5 h-3.5 ${isReplaying ? 'animate-pulse text-amber-500' : ''}`} />
+            <span>{isReplaying ? 'Replaying...' : 'Replay'}</span>
           </button>
 
           <button
@@ -413,10 +419,10 @@ export default function App() {
         </div>
       </main>
 
-      {/* Footer: crafted by ibrahim */}
-      <footer className="w-full py-5 text-center z-30 font-mono select-none">
-        <p className="text-[11px] text-neutral-500 dark:text-neutral-400 font-mono">
-          crafted by{' '}
+      {/* Cool Sentence-Style Footer with GitHub Icon & Link */}
+      <footer className="w-full py-6 px-4 text-center z-30 font-mono select-none">
+        <div className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 text-xs text-neutral-500 dark:text-neutral-400 font-mono">
+          <span>Every keystroke tells a story — crafted by</span>
           <a
             href="https://ibrahim.is-cool.dev"
             target="_blank"
@@ -425,7 +431,25 @@ export default function App() {
           >
             ibrahim
           </a>
-        </p>
+          <span className="hidden xs:inline text-neutral-400 dark:text-neutral-600">•</span>
+          <span className="inline-flex items-center gap-1.5">
+            <span>find me on</span>
+            <a
+              href="https://github.com/carbonthecoder"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 font-bold text-neutral-900 dark:text-neutral-100 hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors group"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="w-3.5 h-3.5 fill-current transition-transform duration-150 group-hover:scale-110"
+              >
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
+              <span className="underline underline-offset-4">@carbonthecoder</span>
+            </a>
+          </span>
+        </div>
       </footer>
 
       {/* Bottom Right: Options Trigger Button */}
