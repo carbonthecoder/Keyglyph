@@ -127,27 +127,47 @@ export default function App() {
   const svgRef = useRef(null);
   const textInputRef = useRef(null);
 
-  // Automatically hide keyboard after 1.8 seconds of inactivity
+  // Automatically hide keyboard after 1.8 seconds of inactivity ONLY if text is entered
   const scheduleKeyboardHide = useCallback(() => {
     if (hideTimerRef.current) {
       clearTimeout(hideTimerRef.current);
     }
+    if (!inputText || !inputText.trim()) {
+      setIsKeyboardVisible(true);
+      return;
+    }
     hideTimerRef.current = setTimeout(() => {
       setIsKeyboardVisible(false);
     }, 1800);
-  }, []);
+  }, [inputText]);
 
-  // Show keys immediately and restart the 1.8s disappearance countdown
+  // Show keys immediately and restart the 1.8s disappearance countdown (if text is entered)
   const triggerKeyboardActive = useCallback(() => {
     if (!isReplaying) {
       setIsKeyboardVisible(true);
-      scheduleKeyboardHide();
+      if (inputText && inputText.trim()) {
+        scheduleKeyboardHide();
+      } else {
+        if (hideTimerRef.current) {
+          clearTimeout(hideTimerRef.current);
+        }
+      }
     }
-  }, [isReplaying, scheduleKeyboardHide]);
+  }, [isReplaying, inputText, scheduleKeyboardHide]);
 
   const handleTypingActivity = useCallback(() => {
     triggerKeyboardActive();
   }, [triggerKeyboardActive]);
+
+  // When text is cleared, ensure keyboard stays visible permanently
+  useEffect(() => {
+    if (!inputText || !inputText.trim()) {
+      setIsKeyboardVisible(true);
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current);
+      }
+    }
+  }, [inputText]);
 
   // Theme setup
   useEffect(() => {
@@ -155,11 +175,15 @@ export default function App() {
     if (savedTheme) {
       setIsDark(savedTheme === 'dark');
     }
-    scheduleKeyboardHide();
+    if (inputText && inputText.trim()) {
+      scheduleKeyboardHide();
+    } else {
+      setIsKeyboardVisible(true);
+    }
     return () => {
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     };
-  }, [scheduleKeyboardHide]);
+  }, [scheduleKeyboardHide, inputText]);
 
   useEffect(() => {
     if (isDark) {
@@ -532,7 +556,7 @@ export default function App() {
             onKeyClick={handleVirtualKeyClick}
             onKeyPositionsUpdate={setKeyPositions}
             isDark={isDark}
-            isVisible={isKeyboardVisible && !isReplaying}
+            isVisible={(!inputText || !inputText.trim() || isKeyboardVisible) && !isReplaying}
             onHover={triggerKeyboardActive}
           />
 
