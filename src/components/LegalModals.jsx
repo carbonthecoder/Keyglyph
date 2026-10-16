@@ -1,0 +1,115 @@
+import React from 'react';
+import { X } from 'lucide-react';
+
+export function LegalModals({ activeModal, onClose, isDark = true }) {
+  if (!activeModal) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div
+        className={`w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl p-6 sm:p-8 shadow-2xl border transition-all text-xs font-sans leading-relaxed ${
+          isDark
+            ? 'bg-black border-neutral-800 text-neutral-300'
+            : 'bg-white border-neutral-300 text-neutral-700'
+        }`}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between pb-4 border-b border-neutral-200 dark:border-neutral-800 mb-6">
+          <h2 className="text-base sm:text-lg font-bold font-syne text-neutral-900 dark:text-neutral-100 uppercase tracking-wide">
+            {activeModal === 'privacy' && 'Privacy Policy'}
+            {activeModal === 'terms' && 'Terms of Service'}
+            {activeModal === 'about' && 'About Keyglyph'}
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-lg text-neutral-400 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Privacy Policy */}
+        {activeModal === 'privacy' && (
+          <div className="space-y-4">
+            <p className="text-[11px] text-neutral-500 font-mono">Last updated: October 2026</p>
+            
+            <h3 className="font-bold text-neutral-900 dark:text-neutral-100 text-sm">1. Introduction</h3>
+            <p>
+              At Keyglyph (accessible from https://keyglyph.vercel.app/), the privacy of our visitors is of paramount importance to us. This Privacy Policy document outlines the types of personal information received and collected by Keyglyph and how it is used.
+            </p>
+
+            <h3 className="font-bold text-neutral-900 dark:text-neutral-100 text-sm">2. Client-Side Data Processing</h3>
+            <p>
+              Keyglyph operates entirely client-side. The names, keystrokes, and text inputs you provide are processed in real-time in your browser’s local memory to compute vector spline paths. We do not transmit, log, store, or sell any names, text inputs, or generated signatures on any external server.
+            </p>
+
+            <h3 className="font-bold text-neutral-900 dark:text-neutral-100 text-sm">3. Google AdSense & Third-Party Advertising</h3>
+            <p>
+              Third-party vendors, including Google, use cookies to serve ads based on a user's prior visits to this website or other websites. Google's use of advertising cookies enables it and its partners to serve ads to our users based on their visit to Keyglyph and/or other sites on the Internet.
+            </p>
+            <p>
+              Users may opt out of personalized advertising by visiting Google's <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" className="underline text-neutral-900 dark:text-white">Ads Settings</a> or by visiting <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" className="underline text-neutral-900 dark:text-white">aboutads.info</a>.
+            </p>
+
+            <h3 className="font-bold text-neutral-900 dark:text-neutral-100 text-sm">4. Log Files & Analytics</h3>
+            <p>
+              Like many standard web platforms, Keyglyph hosting (provided by Vercel) may log standard anonymous request data (including internet protocol (IP) addresses, browser type, internet service provider (ISP), referring/exit pages, and number of clicks) to analyze trends and administer the site. None of this data is linked to personally identifiable information.
+            </p>
+
+            <h3 className="font-bold text-neutral-900 dark:text-neutral-100 text-sm">5. Consent</h3>
+            <p>
+              By using our website, you hereby consent to our Privacy Policy and agree to its terms.
+            </p>
+          </div>
+        )}
+
+        {/* Terms of Service */}
+        {activeModal === 'terms' && (
+          <div className="space-y-4">
+            <p className="text-[11px] text-neutral-500 font-mono">Last updated: October 2026</p>
+
+            <h3 className="font-bold text-neutral-900 dark:text-neutral-100 text-sm">1. Terms of Use</h3>
+            <p>
+              By accessing Keyglyph, you agree to be bound by these Terms of Service and agree that you are responsible for agreement with any applicable local laws.
+            </p>
+
+            <h3 className="font-bold text-neutral-900 dark:text-neutral-100 text-sm">2. Use License & Ownership</h3>
+            <p>
+              The code and software interface of Keyglyph is open-source under the MIT License. All vector signatures, SVG files, PNG images, and videos generated by you using Keyglyph are 100% your own property and may be used for both personal and commercial endeavors without attribution.
+            </p>
+
+            <h3 className="font-bold text-neutral-900 dark:text-neutral-100 text-sm">3. Disclaimer</h3>
+            <p>
+              The materials on Keyglyph are provided on an 'as is' basis. Keyglyph makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including without limitation implied warranties of merchantability or fitness for a particular purpose.
+            </p>
+          </div>
+        )}
+
+        {/* About */}
+        {activeModal === 'about' && (
+          <div className="space-y-4">
+            <h3 className="font-bold text-neutral-900 dark:text-neutral-100 text-sm">About Keyglyph</h3>
+            <p>
+              Keyglyph is an open-source generative typography tool created by <strong>Carbon</strong> (<a href="https://github.com/carbonthecoder" target="_blank" rel="noopener noreferrer" className="underline text-neutral-900 dark:text-white">@carbonthecoder</a>).
+            </p>
+            <p>
+              It explores the intersection of biomechanical typing cadence and mathematical vector geometry, giving people a clean, minimal, artistic signature derived from their everyday keyboard interactions.
+            </p>
+            <p>
+              Source code is publicly available on <a href="https://github.com/carbonthecoder/Keyglyph" target="_blank" rel="noopener noreferrer" className="underline text-neutral-900 dark:text-white">GitHub</a>.
+            </p>
+          </div>
+        )}
+
+        <div className="mt-8 pt-4 border-t border-neutral-200 dark:border-neutral-800 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold text-xs transition-colors cursor-pointer"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

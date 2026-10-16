@@ -5,7 +5,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'><path d='M3 18v-6a9 9 0 0 1 18 0v6'/><path d='M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z'/></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Keyglyph — Keyboard Vector Signature Generator</title>
-    <meta name="description" content="Generate beautiful geometric vector signatures mapped directly to your keyboard." />
+    <meta name="description" content="Keyglyph is a generative vector typography tool that turns your typed name into geometric digital signatures based on physical keyboard coordinates." />
     
     <!-- Open Graph & Twitter Cards for Social Sharing -->
     <meta property="og:type" content="website" />
@@ -21,11 +21,76 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
     
-    <!-- Google AdSense Ready -->
+    <!-- Structured Data (Schema.org) for Search & AdSense Bots -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Keyglyph",
+      "url": "https://keyglyph.vercel.app/",
+      "description": "Generative vector signature generator mapping keystroke coordinates across physical keyboard layouts to render vector art.",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "creator": {
+        "@type": "Person",
+        "name": "Carbon",
+        "url": "https://github.com/carbonthecoder"
+      }
+    }
+    </script>
+
+    <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7551687213800705" crossorigin="anonymous"></script>
   </head>
   <body class="bg-black text-white antialiased transition-colors duration-200">
-    <div id="root"></div>
+    <div id="root">
+      <!-- Semantic Publisher Content pre-loaded for search & AdSense review crawlers -->
+      <header style="padding: 24px; text-align: center;">
+        <h1 style="font-size: 28px; font-weight: bold; margin-bottom: 8px;">Keyglyph — Generative Keyboard Vector Signatures</h1>
+        <p style="font-size: 14px; color: #888; max-width: 600px; margin: 0 auto;">
+          Transform your typed name and keystrokes into geometric vector signatures mapped directly to physical keyboard topology.
+        </p>
+      </header>
+
+      <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        <article>
+          <h2 style="font-size: 20px; font-weight: bold; margin-top: 24px;">About Keyglyph & Kinetic Keystroke Typography</h2>
+          <p style="line-height: 1.6; color: #aaa; margin: 12px 0;">
+            Keyglyph is an interactive design tool that explores the visual geometry of typing. As letters are entered, the system registers each key’s spatial coordinate on the active keyboard layout (including QWERTY, Dvorak, Colemak, AZERTY, and QWERTZ). It then computes continuous spline trajectories connecting each key center, yielding an abstract, personal digital signature.
+          </p>
+
+          <h3 style="font-size: 16px; font-weight: bold; margin-top: 18px;">Mathematical Interpolation & Splines</h3>
+          <p style="line-height: 1.6; color: #aaa; margin: 12px 0;">
+            The application calculates vector paths using five distinct algorithmic models: Linear polygon paths, Simple curved fillets, Quadratic Bezier approximations, Cubic Bezier curves, and Centripetal Catmull-Rom splines with dynamic tension controls.
+          </p>
+
+          <h3 style="font-size: 16px; font-weight: bold; margin-top: 18px;">Features & Export Capabilities</h3>
+          <ul style="line-height: 1.8; color: #aaa; padding-left: 20px;">
+            <li>Real-time client-side coordinate tracking across 5 international keyboard layouts.</li>
+            <li>Mechanical keyboard switch audio simulation with realistic tactile feedback.</li>
+            <li>Standalone vector SVG download with clean viewBox and namespaces.</li>
+            <li>High-resolution 2x retina PNG export with customizable background fills.</li>
+            <li>100% private, client-side memory execution with zero server logging.</li>
+          </ul>
+
+          <h3 style="font-size: 16px; font-weight: bold; margin-top: 18px;">Frequently Asked Questions</h3>
+          <p style="color: #aaa; line-height: 1.6;">
+            <strong>Are generated signatures free for commercial use?</strong><br />
+            Yes, all vector signatures and assets exported from Keyglyph are royalty-free and owned by the creator.
+          </p>
+        </article>
+      </main>
+
+      <footer style="text-align: center; padding: 30px; font-size: 12px; color: #666; border-top: 1px solid #222;">
+        <p>© Keyglyph • Crafted by Carbon (@carbonthecoder)</p>
+        <p>Privacy Policy • Terms of Service • Free Open-Source Tool</p>
+      </footer>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

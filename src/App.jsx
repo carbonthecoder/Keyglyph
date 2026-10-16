@@ -7,6 +7,8 @@ import { SignatureOverlay } from './components/SignatureOverlay';
 import { OptionsDrawer } from './components/OptionsDrawer';
 import { AboutPage } from './components/AboutPage';
 import { AdModal } from './components/AdModal';
+import { ContentSection } from './components/ContentSection';
+import { LegalModals } from './components/LegalModals';
 import { soundEngine } from './utils/audio';
 import { downloadSVG, downloadPNG, copySVGToClipboard, recordReplayVideo } from './utils/export';
 import { KEYBOARD_LAYOUTS } from './utils/layouts';
@@ -41,8 +43,9 @@ export default function App() {
   const isHoveringBoardRef = useRef(false);
   const hideTimerRef = useRef(null);
 
-  // About Page state
+  // About Page & Legal Modals state
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [activeLegalModal, setActiveLegalModal] = useState(null); // 'privacy' | 'terms' | 'about' | null
 
   // Listen to browser hash (#about)
   useEffect(() => {
@@ -762,6 +765,9 @@ export default function App() {
         )}
       </main>
 
+      {/* Editorial Documentation & FAQ Section for AdSense Value Compliance */}
+      <ContentSection isDark={isDark} />
+
       {/* Footer */}
       <footer className="w-full mt-auto py-8 px-6 sm:px-12 select-none font-mono z-30 relative">
         {/* Options Button: Positioned cleanly ABOVE the divider line */}
@@ -779,8 +785,8 @@ export default function App() {
         {/* Full-width Divider Line */}
         <div className="w-full border-t border-neutral-300 dark:border-neutral-800 mb-6" />
 
-        {/* Bottom Content: Clean credit and GitHub profile with icon */}
-        <div className="w-full flex items-center justify-between text-xs text-neutral-500">
+        {/* Bottom Content: Clean credit and legal links */}
+        <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-500">
           <div className="flex items-center gap-2 text-neutral-900 dark:text-neutral-300">
             <span>©</span>
             <span>crafted by</span>
@@ -805,6 +811,30 @@ export default function App() {
               <span className="underline underline-offset-4">@carbonthecoder</span>
             </a>
           </div>
+
+          {/* AdSense Required Legal Pages */}
+          <div className="flex items-center gap-4 text-[11px] text-neutral-500 font-mono">
+            <button
+              onClick={() => setIsAboutOpen(true)}
+              className="hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer underline underline-offset-4"
+            >
+              About
+            </button>
+            <span>•</span>
+            <button
+              onClick={() => setActiveLegalModal('privacy')}
+              className="hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer underline underline-offset-4"
+            >
+              Privacy Policy
+            </button>
+            <span>•</span>
+            <button
+              onClick={() => setActiveLegalModal('terms')}
+              className="hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer underline underline-offset-4"
+            >
+              Terms
+            </button>
+          </div>
         </div>
       </footer>
 
@@ -825,6 +855,13 @@ export default function App() {
         onClose={() => setIsAdOpen(false)}
         onRewardUnlocked={handleRewardUnlocked}
         exportType={pendingExportType}
+        isDark={isDark}
+      />
+
+      {/* Privacy Policy & Terms Legal Modals */}
+      <LegalModals
+        activeModal={activeLegalModal}
+        onClose={() => setActiveLegalModal(null)}
         isDark={isDark}
       />
 
