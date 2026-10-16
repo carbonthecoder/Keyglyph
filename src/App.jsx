@@ -9,7 +9,16 @@ import { AboutPage } from './components/AboutPage';
 import { AdModal } from './components/AdModal';
 import { LegalModals } from './components/LegalModals';
 import { soundEngine } from './utils/audio';
-import { downloadSVG, downloadPNG, copySVGToClipboard, recordReplayVideo } from './utils/export';
+import {
+  downloadSVG,
+  downloadPNG,
+  downloadJPG,
+  downloadWebP,
+  downloadPDF,
+  copySVGToClipboard,
+  recordReplayVideo,
+} from './utils/export';
+import GlideSelect from './components/GlideSelect';
 import { KEYBOARD_LAYOUTS } from './utils/layouts';
 import { CURVE_TYPES } from './utils/curves';
 
@@ -117,7 +126,7 @@ export default function App() {
   const [isLinkCopied, setIsLinkCopied] = useState(false);
   const [isRecordingVideo, setIsRecordingVideo] = useState(false);
   const [selectedVideoFormat, setSelectedVideoFormat] = useState('mp4');
-  const [selectedImageFormat, setSelectedImageFormat] = useState('svg');
+  const [selectedImageFormat, setSelectedImageFormat] = useState('png');
 
   // Name Stacking state (default false every time)
   const [nameStacking, setNameStacking] = useState(false);
@@ -436,18 +445,30 @@ export default function App() {
 
   const handleRewardUnlocked = () => {
     setIsAdOpen(false);
-    if (pendingExportType === 'SVG') {
-      if (svgRef.current) {
-        downloadSVG(svgRef.current, `${inputText || 'signature'}.svg`, isDark);
-        confetti({ particleCount: 35, spread: 50, origin: { y: 0.85 } });
-        showToast('SVG exported');
-      }
+    if (!svgRef.current) return;
+    const slug = inputText.trim() ? inputText.trim() : 'signature';
+    const fmt = (pendingExportType || selectedImageFormat || 'PNG').toUpperCase();
+
+    if (fmt === 'SVG') {
+      downloadSVG(svgRef.current, `${slug}.svg`, isDark);
+      confetti({ particleCount: 35, spread: 50, origin: { y: 0.85 } });
+      showToast('SVG exported');
+    } else if (fmt === 'JPG') {
+      downloadJPG(svgRef.current, `${slug}.jpg`, 2, isDark);
+      confetti({ particleCount: 35, spread: 50, origin: { y: 0.85 } });
+      showToast('JPG exported');
+    } else if (fmt === 'WEBP') {
+      downloadWebP(svgRef.current, `${slug}.webp`, 2, isDark);
+      confetti({ particleCount: 35, spread: 50, origin: { y: 0.85 } });
+      showToast('WebP exported');
+    } else if (fmt === 'PDF') {
+      downloadPDF(svgRef.current, `${slug}.pdf`, isDark);
+      confetti({ particleCount: 35, spread: 50, origin: { y: 0.85 } });
+      showToast('PDF exported');
     } else {
-      if (svgRef.current) {
-        downloadPNG(svgRef.current, `${inputText || 'signature'}.png`, 2, isDark);
-        confetti({ particleCount: 40, spread: 55, origin: { y: 0.85 } });
-        showToast('PNG exported');
-      }
+      downloadPNG(svgRef.current, `${slug}.png`, 2, isDark);
+      confetti({ particleCount: 40, spread: 55, origin: { y: 0.85 } });
+      showToast('PNG exported');
     }
   };
 
@@ -713,52 +734,25 @@ export default function App() {
               </div>
             </div>
 
-            <div className={`inline-flex items-center rounded-lg border shadow-sm font-mono text-xs ${
-              isDark ? 'border-neutral-800 bg-white text-black' : 'border-neutral-800 bg-black text-white'
-            }`}>
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={() => handleStartExport(selectedImageFormat.toUpperCase())}
-                className={`h-8 px-3 text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer rounded-l-lg ${
+                className={`h-8 px-3 text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer rounded-lg border shadow-sm ${
                   isDark
-                    ? 'hover:bg-neutral-200 text-black'
-                    : 'hover:bg-neutral-800 text-white'
+                    ? 'border-neutral-800 bg-white text-black hover:bg-neutral-200'
+                    : 'border-neutral-800 bg-black text-white hover:bg-neutral-800'
                 }`}
-                title={`Export image as .${selectedImageFormat}`}
+                title={`Export signature as .${selectedImageFormat}`}
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Export Image</span>
               </button>
-              <div className={`h-4 w-px ${isDark ? 'bg-neutral-300' : 'bg-neutral-700'}`} />
-              <div className="flex items-center gap-0.5 px-1.5">
-                <button
-                  onClick={() => setSelectedImageFormat('svg')}
-                  className={`px-1.5 py-0.5 text-[10px] rounded cursor-pointer transition-colors ${
-                    selectedImageFormat === 'svg'
-                      ? isDark
-                        ? 'bg-neutral-300 text-black font-bold'
-                        : 'bg-neutral-800 text-white font-bold'
-                      : isDark
-                      ? 'text-neutral-600 hover:text-black'
-                      : 'text-neutral-400 hover:text-white'
-                  }`}
-                >
-                  svg
-                </button>
-                <button
-                  onClick={() => setSelectedImageFormat('png')}
-                  className={`px-1.5 py-0.5 text-[10px] rounded cursor-pointer transition-colors ${
-                    selectedImageFormat === 'png'
-                      ? isDark
-                        ? 'bg-neutral-300 text-black font-bold'
-                        : 'bg-neutral-800 text-white font-bold'
-                      : isDark
-                      ? 'text-neutral-600 hover:text-black'
-                      : 'text-neutral-400 hover:text-white'
-                  }`}
-                >
-                  png
-                </button>
-              </div>
+              <GlideSelect
+                value={selectedImageFormat}
+                onChange={setSelectedImageFormat}
+                isDark={isDark}
+                onSound={() => soundEngine.playKey()}
+              />
             </div>
           </div>
         )}
