@@ -7,7 +7,6 @@ import { SignatureOverlay } from './components/SignatureOverlay';
 import { OptionsDrawer } from './components/OptionsDrawer';
 import { AboutPage } from './components/AboutPage';
 import { AdModal } from './components/AdModal';
-import { ContentSection } from './components/ContentSection';
 import { LegalModals } from './components/LegalModals';
 import { soundEngine } from './utils/audio';
 import { downloadSVG, downloadPNG, copySVGToClipboard, recordReplayVideo } from './utils/export';
@@ -764,9 +763,6 @@ export default function App() {
           </div>
         )}
       </main>
-
-      {/* Editorial Documentation & FAQ Section for AdSense Value Compliance */}
-      <ContentSection isDark={isDark} />
 
       {/* Footer */}
       <footer className="w-full mt-auto py-8 px-6 sm:px-12 select-none font-mono z-30 relative">
